@@ -43,7 +43,8 @@ function Home() {
           </div>
 
           <p className="opening">
-            OPEN TODAY: 10:00 AM – 9:00 PM
+            MONDAY TO SATURDAY: 10:00 AM - 9:00 PM
+            SUNDAY: 9:00 AM - 9:00 PM
           </p>
 
         </div>
