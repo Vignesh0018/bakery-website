@@ -42,9 +42,9 @@ function Home() {
             </button>
           </div>
 
-          <p className="opening">
+          <p className="opening">>
             MONDAY TO SATURDAY: 10:00 AM - 9:00 PM
-            <br />
+            
             SUNDAY: 9:00 AM - 9:00 PM
           </p>
 
