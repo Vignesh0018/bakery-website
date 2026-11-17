@@ -39,6 +39,7 @@ function App() {
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/products" element={<Products />} />
+        <Route path="/admin/orders" element={<Orders />} />
       </Routes>
     </BrowserRouter>
   );
