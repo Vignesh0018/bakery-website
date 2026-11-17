@@ -1,5 +1,6 @@
 
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import "../styles/Navbar.css";
 
 function Navbar() {
@@ -30,7 +31,11 @@ function Navbar() {
         <li><a href="#contact-us" onClick={closeMenu}>Contact</a></li>
       </ul>
 
-      <a href="#order" className="order-btn">
+      <a
+        href="#order"
+        className="order-btn"
+        onClick={closeMenu}
+      >
         Order Now
       </a>
     </nav>
