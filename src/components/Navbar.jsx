@@ -1,27 +1,38 @@
 
-import React from "react";
+import React, { useState } from "react";
 import "../styles/Navbar.css";
 
 function Navbar() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const closeMenu = () => setMenuOpen(false);
+
   return (
     <nav className="navbar">
-
       <div className="logo">
         THE GOLDEN CRUST.
       </div>
 
-      <ul className="nav-links">
-        <li><a href="#home">Home</a></li>
-        <li><a href="#menu">Menu</a></li>
-        <li><a href="#about">About</a></li>
-        <li><a href="#gallery">Gallery</a></li>
-        <li><a href="#contact">Contact</a></li>
+      <button
+        className="menu-toggle"
+        onClick={() => setMenuOpen(!menuOpen)}
+        aria-label="Toggle navigation menu"
+        aria-expanded={menuOpen}
+      >
+        {menuOpen ? "✕" : "☰"}
+      </button>
+
+      <ul className={`nav-links ${menuOpen ? "active" : ""}`}>
+        <li><a href="#home" onClick={closeMenu}>Home</a></li>
+        <li><a href="#menu" onClick={closeMenu}>Menu</a></li>
+        <li><a href="#about" onClick={closeMenu}>About</a></li>
+        <li><a href="#gallery" onClick={closeMenu}>Gallery</a></li>
+        <li><a href="#contact-us" onClick={closeMenu}>Contact</a></li>
       </ul>
 
-      <a href="#contact" className="order-btn">
+      <a href="#order" className="order-btn">
         Order Now
       </a>
-
     </nav>
   );
 }
