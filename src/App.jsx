@@ -10,9 +10,11 @@ import Gallery from "./pages/Gallery";
 import Contact from "./pages/Contact";
 import Footer from "./components/Footer";
 import Products from "./pages/Products";
+import Orders from "./pages/Orders";
 
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
+
 
 function CustomerWebsite() {
   return (
