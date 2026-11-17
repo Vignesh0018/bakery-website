@@ -28,6 +28,7 @@ function Navbar() {
         <li><a href="#about" onClick={closeMenu}>About</a></li>
         <li><a href="#gallery" onClick={closeMenu}>Gallery</a></li>
         <li><a href="#contact-us" onClick={closeMenu}>Contact</a></li>
+        <a href="#order">Order Now</a>
       </ul>
 
       <a href="#order" className="order-btn">
