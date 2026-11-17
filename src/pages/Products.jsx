@@ -48,6 +48,18 @@ function Products() {
     });
   };
 
+  const getStoragePath = (imageUrl) => {
+    const marker = "/product-images/";
+
+    if (!imageUrl || !imageUrl.includes(marker)) {
+      return null;
+    }
+
+    return decodeURIComponent(
+      imageUrl.split(marker)[1].split("?")[0]
+    );
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -58,7 +70,10 @@ function Products() {
     try {
       let imageUrl = null;
 
-      // Upload image if selected
+      const existingProduct = products.find(
+        (product) => product.id === editingId
+      );
+
       if (form.image) {
         const fileExt = form.image.name.split(".").pop();
         const fileName = `${Date.now()}-${Math.random()
@@ -71,9 +86,7 @@ function Products() {
           .from("product-images")
           .upload(filePath, form.image);
 
-        if (uploadError) {
-          throw uploadError;
-        }
+        if (uploadError) throw uploadError;
 
         const { data: publicUrlData } = supabase.storage
           .from("product-images")
@@ -81,10 +94,6 @@ function Products() {
 
         imageUrl = publicUrlData.publicUrl;
       } else if (editingId) {
-        const existingProduct = products.find(
-          (product) => product.id === editingId
-        );
-
         imageUrl = existingProduct?.image_url || null;
       }
 
@@ -109,8 +118,23 @@ function Products() {
           .insert([productData]);
       }
 
-      if (result.error) {
-        throw result.error;
+      if (result.error) throw result.error;
+
+      // Remove old image after successful replacement
+      if (form.image && existingProduct?.image_url) {
+        const oldPath = getStoragePath(
+          existingProduct.image_url
+        );
+
+        if (oldPath) {
+          const { error: removeError } = await supabase.storage
+            .from("product-images")
+            .remove([oldPath]);
+
+          if (removeError) {
+            console.error("Old image cleanup failed:", removeError);
+          }
+        }
       }
 
       setSuccess(
@@ -149,6 +173,42 @@ function Products() {
     });
   };
 
+  const handleDeleteImage = async (product) => {
+    const confirmed = window.confirm(
+      `Delete the image for ${product.name}?`
+    );
+
+    if (!confirmed) return;
+
+    setError("");
+    setSuccess("");
+
+    try {
+      const imagePath = getStoragePath(product.image_url);
+
+      if (imagePath) {
+        const { error: storageError } = await supabase.storage
+          .from("product-images")
+          .remove([imagePath]);
+
+        if (storageError) throw storageError;
+      }
+
+      const { error: databaseError } = await supabase
+        .from("products")
+        .update({ image_url: null })
+        .eq("id", product.id);
+
+      if (databaseError) throw databaseError;
+
+      setSuccess("Product image deleted successfully!");
+
+      await fetchProducts();
+    } catch (err) {
+      setError(err.message || "Unable to delete image.");
+    }
+  };
+
   const handleDelete = async (id) => {
     const confirmed = window.confirm(
       "Are you sure you want to delete this product?"
@@ -159,18 +219,36 @@ function Products() {
     setError("");
     setSuccess("");
 
-    const { error } = await supabase
-      .from("products")
-      .delete()
-      .eq("id", id);
+    const product = products.find((item) => item.id === id);
 
-    if (error) {
-      setError(error.message);
-      return;
+    try {
+      const { error } = await supabase
+        .from("products")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+
+      // Remove associated image from Storage
+      if (product?.image_url) {
+        const imagePath = getStoragePath(product.image_url);
+
+        if (imagePath) {
+          const { error: storageError } = await supabase.storage
+            .from("product-images")
+            .remove([imagePath]);
+
+          if (storageError) {
+            console.error("Image cleanup failed:", storageError);
+          }
+        }
+      }
+
+      setSuccess("Product deleted successfully!");
+      await fetchProducts();
+    } catch (err) {
+      setError(err.message || "Unable to delete product.");
     }
-
-    setSuccess("Product deleted successfully!");
-    await fetchProducts();
   };
 
   const cancelEdit = () => {
@@ -272,15 +350,26 @@ function Products() {
           products.map((product) => (
             <div key={product.id}>
               {product.image_url && (
-                <img
-                  src={product.image_url}
-                  alt={product.name}
-                  style={{
-                    width: "150px",
-                    height: "120px",
-                    objectFit: "cover",
-                  }}
-                />
+                <div>
+                  <img
+                    src={product.image_url}
+                    alt={product.name}
+                    style={{
+                      width: "150px",
+                      height: "120px",
+                      objectFit: "cover",
+                    }}
+                  />
+
+                  <br />
+
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteImage(product)}
+                  >
+                    Delete Image
+                  </button>
+                </div>
               )}
 
               <h3>{product.name}</h3>
