@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { supabase } from "../lib/supabase";
+import "../styles/AdminLogin.css";
 
 function AdminLogin() {
   const [email, setEmail] = useState("");
