@@ -97,3 +97,84 @@
     grid-column: 1;
   }
 }
+
+
+/* Tablet responsiveness */
+@media (max-width: 900px) {
+  .order-section {
+    padding: 75px 5%;
+  }
+
+  .order-form {
+    max-width: 700px;
+    padding: 30px;
+    gap: 20px;
+  }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 650px) {
+  .order-section {
+    padding: 55px 5%;
+  }
+
+  .order-heading {
+    margin-bottom: 30px;
+  }
+
+  .order-heading p {
+    font-size: 11px;
+    letter-spacing: 2px;
+  }
+
+  .order-heading h2 {
+    font-size: 28px;
+    line-height: 1.3;
+  }
+
+  .order-heading span {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .order-form {
+    width: 100%;
+    box-sizing: border-box;
+    grid-template-columns: 1fr;
+    padding: 22px 16px;
+    gap: 20px;
+  }
+
+  .form-group {
+    min-width: 0;
+  }
+
+  .form-group label {
+    font-size: 14px;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 13px;
+    font-size: 16px;
+  }
+
+  .form-group input[type="file"] {
+    font-size: 13px;
+  }
+
+  .full-width,
+  .submit-order {
+    grid-column: 1;
+  }
+
+  .submit-order {
+    width: 100%;
+    padding: 16px;
+    font-size: 15px;
+  }
+}
