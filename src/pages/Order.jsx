@@ -3,7 +3,6 @@ import React from "react";
 import "../styles/Order.css";
 
 function Order() {
-
   const handleSubmit = (event) => {
     event.preventDefault();
 
@@ -40,7 +39,7 @@ Order Type: ${delivery}
   };
 
   return (
-    <section className="order-section" id="contact">
+    <section className="order-section" id="order">
 
       <div className="order-heading">
         <p>CUSTOM CAKE ORDERS</p>
@@ -118,16 +117,14 @@ Order Type: ${delivery}
           />
         </div>
 
-<div className="form-group full-width">
-  <label>Upload Cake Reference Image</label>
-
-  <input
-    type="file"
-    name="reference"
-    accept="image/*"
-  />
-</div>
-
+        <div className="form-group full-width">
+          <label>Upload Cake Reference Image</label>
+          <input
+            type="file"
+            name="reference"
+            accept="image/*"
+          />
+        </div>
 
         <div className="form-group full-width">
           <label>Pickup or Delivery</label>
@@ -143,7 +140,6 @@ Order Type: ${delivery}
         </button>
 
       </form>
-
     </section>
   );
 }
