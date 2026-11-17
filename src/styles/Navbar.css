@@ -8,6 +8,8 @@
   justify-content: space-between;
   background-color: #fff8ef;
   border-bottom: 1px solid #eadfd2;
+  position: relative;
+  z-index: 1000;
 }
 
 .logo {
@@ -41,9 +43,68 @@
   padding: 13px 24px;
   border-radius: 5px;
   text-decoration: none;
-  transition: background 0.3s;
+  transition: background-color 0.3s;
 }
 
 .order-btn:hover {
   background-color: #a66b42;
+}
+
+/* Hamburger button */
+.menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: #743e26;
+  font-size: 28px;
+  cursor: pointer;
+}
+
+/* Mobile responsive design */
+@media (max-width: 768px) {
+  .navbar {
+    min-height: 75px;
+    padding: 0 5%;
+  }
+
+  .logo {
+    font-size: 20px;
+    letter-spacing: 1px;
+  }
+
+  .menu-toggle {
+    display: block;
+  }
+
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 75px;
+    left: 0;
+    width: 100%;
+    background-color: #fff8ef;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    padding: 10px 0;
+    border-bottom: 1px solid #eadfd2;
+  }
+
+  .nav-links.active {
+    display: flex;
+  }
+
+  .nav-links li {
+    width: 100%;
+    text-align: center;
+    padding: 15px 0;
+  }
+
+  .nav-links a {
+    font-size: 16px;
+  }
+
+  .order-btn {
+    display: none;
+  }
 }
