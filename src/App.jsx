@@ -9,6 +9,7 @@ import About from "./pages/About";
 import Gallery from "./pages/Gallery";
 import Contact from "./pages/Contact";
 import Footer from "./components/Footer";
+import Products from "./pages/Products";
 
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -35,6 +36,7 @@ function App() {
         <Route path="/" element={<CustomerWebsite />} />
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/admin/products" element={<Products />} />
       </Routes>
     </BrowserRouter>
   );

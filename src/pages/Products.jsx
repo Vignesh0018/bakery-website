@@ -1,0 +1,306 @@
+
+import { useEffect, useState } from "react";
+import { supabase } from "../lib/supabase";
+
+function Products() {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const emptyForm = {
+    name: "",
+    description: "",
+    price: "",
+    category: "",
+    image: null,
+  };
+
+  const [form, setForm] = useState(emptyForm);
+
+  const fetchProducts = async () => {
+    setLoading(true);
+
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      setError(error.message);
+    } else {
+      setProducts(data || []);
+    }
+
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    setError("");
+    setSuccess("");
+    setSaving(true);
+
+    try {
+      let imageUrl = null;
+
+      // Upload image if selected
+      if (form.image) {
+        const fileExt = form.image.name.split(".").pop();
+        const fileName = `${Date.now()}-${Math.random()
+          .toString(36)
+          .slice(2)}.${fileExt}`;
+
+        const filePath = `products/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("product-images")
+          .upload(filePath, form.image);
+
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        const { data: publicUrlData } = supabase.storage
+          .from("product-images")
+          .getPublicUrl(filePath);
+
+        imageUrl = publicUrlData.publicUrl;
+      } else if (editingId) {
+        const existingProduct = products.find(
+          (product) => product.id === editingId
+        );
+
+        imageUrl = existingProduct?.image_url || null;
+      }
+
+      const productData = {
+        name: form.name.trim(),
+        description: form.description.trim(),
+        price: Number(form.price),
+        category: form.category,
+        image_url: imageUrl,
+      };
+
+      let result;
+
+      if (editingId) {
+        result = await supabase
+          .from("products")
+          .update(productData)
+          .eq("id", editingId);
+      } else {
+        result = await supabase
+          .from("products")
+          .insert([productData]);
+      }
+
+      if (result.error) {
+        throw result.error;
+      }
+
+      setSuccess(
+        editingId
+          ? "Product updated successfully!"
+          : "Product added successfully!"
+      );
+
+      setForm(emptyForm);
+      setEditingId(null);
+
+      await fetchProducts();
+    } catch (err) {
+      setError(err.message || "Something went wrong.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleEdit = (product) => {
+    setForm({
+      name: product.name,
+      description: product.description || "",
+      price: product.price,
+      category: product.category,
+      image: null,
+    });
+
+    setEditingId(product.id);
+    setError("");
+    setSuccess("");
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
+  const handleDelete = async (id) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this product?"
+    );
+
+    if (!confirmed) return;
+
+    setError("");
+    setSuccess("");
+
+    const { error } = await supabase
+      .from("products")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      setError(error.message);
+      return;
+    }
+
+    setSuccess("Product deleted successfully!");
+    await fetchProducts();
+  };
+
+  const cancelEdit = () => {
+    setForm(emptyForm);
+    setEditingId(null);
+    setError("");
+    setSuccess("");
+  };
+
+  return (
+    <div className="products-page">
+      <h1>Product Management</h1>
+      <p>Manage your bakery products here.</p>
+
+      <section>
+        <h2>{editingId ? "Edit Product" : "Add New Product"}</h2>
+
+        <form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            name="name"
+            placeholder="Product Name"
+            value={form.name}
+            onChange={handleChange}
+            required
+          />
+
+          <textarea
+            name="description"
+            placeholder="Product Description"
+            value={form.description}
+            onChange={handleChange}
+          />
+
+          <input
+            type="number"
+            name="price"
+            placeholder="Product Price"
+            min="0.01"
+            step="0.01"
+            value={form.price}
+            onChange={handleChange}
+            required
+          />
+
+          <select
+            name="category"
+            value={form.category}
+            onChange={handleChange}
+            required
+          >
+            <option value="">Select Category</option>
+            <option value="CAKES">Cakes</option>
+            <option value="PASTRIES">Pastries</option>
+            <option value="BREADS">Breads</option>
+            <option value="COOKIES">Cookies</option>
+          </select>
+
+          <label>Product Image</label>
+
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) =>
+              setForm({
+                ...form,
+                image: e.target.files[0] || null,
+              })
+            }
+          />
+
+          <button type="submit" disabled={saving}>
+            {saving
+              ? "Saving..."
+              : editingId
+                ? "Update Product"
+                : "Add Product"}
+          </button>
+
+          {editingId && (
+            <button type="button" onClick={cancelEdit}>
+              Cancel
+            </button>
+          )}
+        </form>
+
+        {error && <p style={{ color: "red" }}>{error}</p>}
+        {success && <p style={{ color: "green" }}>{success}</p>}
+      </section>
+
+      <section>
+        <h2>All Products ({products.length})</h2>
+
+        {loading ? (
+          <p>Loading products...</p>
+        ) : products.length === 0 ? (
+          <p>No products added yet.</p>
+        ) : (
+          products.map((product) => (
+            <div key={product.id}>
+              {product.image_url && (
+                <img
+                  src={product.image_url}
+                  alt={product.name}
+                  style={{
+                    width: "150px",
+                    height: "120px",
+                    objectFit: "cover",
+                  }}
+                />
+              )}
+
+              <h3>{product.name}</h3>
+              <p>{product.description}</p>
+              <p>Price: ₹{product.price}</p>
+              <p>Category: {product.category}</p>
+
+              <button onClick={() => handleEdit(product)}>
+                Edit
+              </button>
+
+              <button onClick={() => handleDelete(product.id)}>
+                Delete
+              </button>
+            </div>
+          ))
+        )}
+      </section>
+    </div>
+  );
+}
+
+export default Products;

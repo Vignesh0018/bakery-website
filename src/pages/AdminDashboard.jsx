@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
+import "../styles/AdminDashboard.css";
 
 function AdminDashboard() {
   const navigate = useNavigate();
@@ -50,18 +51,80 @@ function AdminDashboard() {
 
   return (
     <div className="admin-dashboard">
+
       <header>
         <h1>THE GOLDEN CRUST.</h1>
         <button onClick={handleLogout}>Logout</button>
       </header>
 
-      <main>
-        <h2>Welcome to Admin Dashboard</h2>
-        <p>Logged in as: {adminEmail}</p>
+      <div className="admin-layout">
 
-        <h3>Bakery Management</h3>
-        <p>Your admin dashboard is ready.</p>
-      </main>
+        <aside className="admin-sidebar">
+          <h3>ADMIN PANEL</h3>
+
+          <nav>
+            <a href="#overview" className="active">Dashboard</a>
+            <a href="#products">Products</a>
+            <a href="#orders">Orders</a>
+            <a href="#customers">Customers</a>
+            <a href="#inventory">Inventory</a>
+            <a href="#settings">Settings</a>
+          </nav>
+        </aside>
+
+        <main className="admin-main">
+
+          <div className="admin-welcome" id="overview">
+            <h2>Welcome Back!</h2>
+            <p>Logged in as: {adminEmail}</p>
+            <p>Here's your bakery management overview.</p>
+          </div>
+
+          <div className="admin-stats">
+
+            <div className="stat-card">
+              <h3>Total Products</h3>
+              <p>0</p>
+            </div>
+
+            <div className="stat-card">
+              <h3>Total Orders</h3>
+              <p>0</p>
+            </div>
+
+            <div className="stat-card">
+              <h3>Pending Orders</h3>
+              <p>0</p>
+            </div>
+
+            <div className="stat-card">
+              <h3>Customers</h3>
+              <p>0</p>
+            </div>
+
+          </div>
+
+          <section className="admin-content">
+            <h2>Quick Actions</h2>
+
+            <div className="admin-actions">
+              <button onClick={() => navigate("/admin/products")}>
+                Manage Products
+              </button>
+
+              <button onClick={() => navigate("/admin/orders")}>
+                Manage Orders
+              </button>
+
+              <button onClick={() => navigate("/admin/inventory")}>
+                Manage Inventory
+              </button>
+            </div>
+          </section>
+
+        </main>
+
+      </div>
     </div>
   );
 }
