@@ -111,3 +111,78 @@
   background: #743e26;
   color: white;
 }
+
+
+/* Tablet responsiveness */
+@media (max-width: 900px) {
+  .menu-section {
+    padding: 75px 5%;
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  .product-card img {
+    height: 230px;
+  }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 600px) {
+  .menu-section {
+    padding: 60px 5%;
+  }
+
+  .menu-subtitle {
+    font-size: 11px;
+    letter-spacing: 2px;
+  }
+
+  .menu-section h2 {
+    font-size: 30px;
+    line-height: 1.2;
+  }
+
+  .menu-description {
+    font-size: 14px;
+    line-height: 1.7;
+    margin-bottom: 30px;
+  }
+
+  .category-filters {
+    gap: 8px;
+    margin-bottom: 30px;
+  }
+
+  .category-filters button {
+    padding: 9px 15px;
+    font-size: 12px;
+  }
+
+  .product-grid {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+
+  .product-card img {
+    height: 220px;
+  }
+
+  .product-info {
+    padding: 18px;
+  }
+
+  .product-info h3 {
+    font-size: 19px;
+  }
+
+  .product-info h4 {
+    font-size: 17px;
+  }
+
+  .dietary-label {
+    font-size: 11px;
+  }
+}
