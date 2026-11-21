@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
+import "../styles/Orders.css";
 
 function Orders() {
   const [orders, setOrders] = useState([]);
