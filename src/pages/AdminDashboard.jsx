@@ -15,6 +15,60 @@ function AdminDashboard() {
     totalCustomers: 0,
   });
 
+  // Fetch dashboard statistics
+  const fetchStats = async () => {
+    const [
+      productsResult,
+      ordersResult,
+      pendingResult,
+      customersResult,
+    ] = await Promise.all([
+      supabase
+        .from("products")
+        .select("*", { count: "exact", head: true }),
+
+      supabase
+        .from("orders")
+        .select("*", { count: "exact", head: true }),
+
+      supabase
+        .from("orders")
+        .select("*", { count: "exact", head: true })
+        .eq("order_status", "Pending"),
+
+      supabase
+        .from("orders")
+        .select("phone"),
+    ]);
+
+    if (
+      productsResult.error ||
+      ordersResult.error ||
+      pendingResult.error ||
+      customersResult.error
+    ) {
+      console.error("Statistics error:", {
+        productsResult,
+        ordersResult,
+        pendingResult,
+        customersResult,
+      });
+      return;
+    }
+
+    const uniqueCustomers = new Set(
+      (customersResult.data || []).map((order) => order.phone)
+    );
+
+    setStats({
+      totalProducts: productsResult.count || 0,
+      totalOrders: ordersResult.count || 0,
+      pendingOrders: pendingResult.count || 0,
+      totalCustomers: uniqueCustomers.size,
+    });
+  };
+
+  // Verify admin and load dashboard
   useEffect(() => {
     const verifyAdmin = async () => {
       const {
@@ -40,6 +94,9 @@ function AdminDashboard() {
       }
 
       setAdminEmail(user.email || "");
+
+      await fetchStats();
+
       setLoading(false);
     };
 
