@@ -1,24 +1,64 @@
-
-import React from "react";
+import React, { useState } from "react";
+import { supabase } from "../lib/supabase";
 import "../styles/Order.css";
 
 function Order() {
-  const handleSubmit = (event) => {
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const form = new FormData(event.currentTarget);
+    if (submitting) return;
 
-    const name = form.get("name");
-    const phone = form.get("phone");
-    const flavour = form.get("flavour");
-    const weight = form.get("weight");
-    const date = form.get("date");
-    const message = form.get("message");
-    const delivery = form.get("delivery");
+    setSubmitting(true);
 
-    const whatsappNumber = "919876543210";
+    try {
+      const form = new FormData(event.currentTarget);
 
-    const orderMessage = `
+      const name = form.get("name").trim();
+      const phone = form.get("phone").trim();
+      const flavour = form.get("flavour");
+      const weight = form.get("weight");
+      const date = form.get("date");
+      const message = form.get("message");
+      const delivery = form.get("delivery");
+
+      const orderItems = [
+        {
+          product: "Custom Cake",
+          flavour,
+          weight,
+          required_date: date,
+          cake_message: message || "No message",
+          delivery_type: delivery,
+          quantity: 1,
+        },
+      ];
+
+      // Save order to Supabase
+      const { error } = await supabase.from("orders").insert([
+        {
+          customer_name: name,
+          phone: phone,
+          address: null,
+          items: orderItems,
+          total_amount: 0,
+          payment_method: "Not specified",
+          order_status: "Pending",
+          notes: `Custom cake order | Required date: ${date} | ${delivery}`,
+        },
+      ]);
+
+      if (error) {
+        console.error("Order database error:", error);
+        alert("Unable to save your order. Please try again.");
+        return;
+      }
+
+      // WhatsApp message
+      const whatsappNumber = "919876543210";
+
+      const orderMessage = `
 Hello The Golden Crust!
 
 I would like to place a custom cake order.
@@ -30,17 +70,28 @@ Cake Weight: ${weight}
 Required Date: ${date}
 Cake Message: ${message || "No message"}
 Order Type: ${delivery}
+
+Please confirm the price and availability.
 `;
 
-    const whatsappURL =
-      `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(orderMessage)}`;
+      const whatsappURL =
+        `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(orderMessage)}`;
 
-    window.open(whatsappURL, "_blank");
+      window.open(whatsappURL, "_blank");
+
+      alert("Your order has been saved successfully!");
+
+      event.target.reset();
+    } catch (error) {
+      console.error("Unexpected order error:", error);
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
     <section className="order-section" id="order">
-
       <div className="order-heading">
         <p>CUSTOM CAKE ORDERS</p>
         <h2>Make Your Celebration Special</h2>
@@ -50,7 +101,6 @@ Order Type: ${delivery}
       </div>
 
       <form className="order-form" onSubmit={handleSubmit}>
-
         <div className="form-group">
           <label>Customer Name</label>
           <input
@@ -135,10 +185,13 @@ Order Type: ${delivery}
           </select>
         </div>
 
-        <button type="submit" className="submit-order">
-          Order Now
+        <button
+          type="submit"
+          className="submit-order"
+          disabled={submitting}
+        >
+          {submitting ? "Submitting Order..." : "Order Now"}
         </button>
-
       </form>
     </section>
   );
