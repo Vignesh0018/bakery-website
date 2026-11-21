@@ -8,6 +8,13 @@ function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [adminEmail, setAdminEmail] = useState("");
 
+  const [stats, setStats] = useState({
+    totalProducts: 0,
+    totalOrders: 0,
+    pendingOrders: 0,
+    totalCustomers: 0,
+  });
+
   useEffect(() => {
     const verifyAdmin = async () => {
       const {
@@ -99,22 +106,22 @@ function AdminDashboard() {
           <div className="admin-stats">
             <div className="stat-card">
               <h3>Total Products</h3>
-              <p>0</p>
+              <p>{stats.totalProducts}</p>
             </div>
 
             <div className="stat-card">
               <h3>Total Orders</h3>
-              <p>0</p>
+              <p>{stats.totalOrders}</p>
             </div>
 
             <div className="stat-card">
               <h3>Pending Orders</h3>
-              <p>0</p>
+              <p>{stats.pendingOrders}</p>
             </div>
 
             <div className="stat-card">
               <h3>Customers</h3>
-              <p>0</p>
+              <p>{stats.totalCustomers}</p>
             </div>
           </div>
 
