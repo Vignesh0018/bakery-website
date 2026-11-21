@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
@@ -51,29 +50,46 @@ function AdminDashboard() {
 
   return (
     <div className="admin-dashboard">
-
       <header>
         <h1>THE GOLDEN CRUST.</h1>
         <button onClick={handleLogout}>Logout</button>
       </header>
 
       <div className="admin-layout">
-
         <aside className="admin-sidebar">
           <h3>ADMIN PANEL</h3>
 
           <nav>
-            <a href="#overview" className="active">Dashboard</a>
-            <a href="#products">Products</a>
-            <a href="#orders">Orders</a>
-            <a href="#customers">Customers</a>
-            <a href="#inventory">Inventory</a>
-            <a href="#settings">Settings</a>
+            <button
+              className="active"
+              onClick={() => navigate("/admin/dashboard")}
+            >
+              Dashboard
+            </button>
+
+            <button onClick={() => navigate("/admin/products")}>
+              Products
+            </button>
+
+            <button onClick={() => navigate("/admin/orders")}>
+              Orders
+            </button>
+
+            <button onClick={() => navigate("/admin/customers")}>
+              Customers
+            </button>
+
+            <button onClick={() => navigate("/admin/inventory")}>
+              Inventory
+            </button>
+
+            <button onClick={() => navigate("/admin/settings")}>
+              Settings
+            </button>
           </nav>
         </aside>
 
         <main className="admin-main">
-
           <div className="admin-welcome" id="overview">
             <h2>Welcome Back!</h2>
             <p>Logged in as: {adminEmail}</p>
@@ -81,7 +97,6 @@ function AdminDashboard() {
           </div>
 
           <div className="admin-stats">
-
             <div className="stat-card">
               <h3>Total Products</h3>
               <p>0</p>
@@ -101,7 +116,6 @@ function AdminDashboard() {
               <h3>Customers</h3>
               <p>0</p>
             </div>
-
           </div>
 
           <section className="admin-content">
@@ -121,9 +135,7 @@ function AdminDashboard() {
               </button>
             </div>
           </section>
-
         </main>
-
       </div>
     </div>
   );
