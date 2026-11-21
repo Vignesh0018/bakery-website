@@ -158,6 +158,10 @@ function AdminDashboard() {
             <h2>Welcome Back!</h2>
             <p>Logged in as: {adminEmail}</p>
             <p>Here's your bakery management overview.</p>
+
+            <button onClick={fetchStats}>
+              Refresh Dashboard
+            </button>
           </div>
 
           <div className="admin-stats">
