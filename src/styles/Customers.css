@@ -29,10 +29,16 @@
   font-size: 15px;
 }
 
-/* Refresh Button */
-.customers-header button {
-  background: #432719;
-  color: #fff8ef;
+/* Header Buttons Container */
+.customers-header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Header Buttons */
+.customers-header-actions button {
   border: none;
   padding: 12px 20px;
   border-radius: 8px;
@@ -41,12 +47,29 @@
   transition: 0.3s ease;
 }
 
-.customers-header button:hover {
+/* Back to Dashboard */
+.customers-back-button {
+  background: #ead9c8;
+  color: #432719;
+}
+
+.customers-back-button:hover {
+  background: #dcc3ad;
+  transform: translateY(-2px);
+}
+
+/* Refresh Button */
+.customers-refresh-button {
+  background: #432719;
+  color: #fff8ef;
+}
+
+.customers-refresh-button:hover {
   background: #6b422b;
   transform: translateY(-2px);
 }
 
-.customers-header button:disabled {
+.customers-header-actions button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
@@ -146,7 +169,12 @@
     font-size: 25px;
   }
 
-  .customers-header button {
+  .customers-header-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .customers-header-actions button {
     width: 100%;
   }
 
