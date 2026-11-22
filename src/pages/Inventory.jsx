@@ -246,6 +246,12 @@ function Inventory() {
     setSuccess("");
 
     try {
+      if (!currentUser) {
+        throw new Error(
+          "Permission denied: Please ensure you are logged in as an administrator to delete items."
+        );
+      }
+
       const { error: deleteErr } = await supabase
         .from("inventory")
         .delete()
@@ -278,6 +284,12 @@ function Inventory() {
     setError("");
 
     try {
+      if (!currentUser) {
+        throw new Error(
+          "Permission denied: Please ensure you are logged in as an administrator to adjust stock."
+        );
+      }
+
       const { error: adjustErr } = await supabase
         .from("inventory")
         .update({ quantity: newQty })
@@ -314,6 +326,12 @@ function Inventory() {
     setSuccess("");
 
     try {
+      if (!currentUser) {
+        throw new Error(
+          "Permission denied: Please ensure you are logged in as an administrator to add inventory."
+        );
+      }
+
       const { error: seedErr } = await supabase
         .from("inventory")
         .insert(BAKERY_DEFAULTS);
