@@ -1,8 +1,12 @@
+
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import "../styles/Customers.css";
 
 function Customers() {
+  const navigate = useNavigate();
+
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -65,21 +69,38 @@ function Customers() {
   return (
     <div className="customers-page">
 
+      {/* Header */}
       <div className="customers-header">
         <div>
           <h1>Customers</h1>
           <p>Manage your bakery customers.</p>
         </div>
 
-        <button onClick={fetchCustomers}>
-          Refresh Customers
-        </button>
+        <div className="customers-header-actions">
+          <button
+            type="button"
+            onClick={() => navigate("/admin/dashboard")}
+            className="customers-back-button"
+          >
+            ← Back to Dashboard
+          </button>
+
+          <button
+            type="button"
+            onClick={fetchCustomers}
+            className="customers-refresh-button"
+          >
+            Refresh Customers
+          </button>
+        </div>
       </div>
 
+      {/* Error */}
       {error && (
         <p className="customers-error">{error}</p>
       )}
 
+      {/* Customer Data */}
       {loading ? (
         <p>Loading customers...</p>
       ) : customers.length === 0 ? (
