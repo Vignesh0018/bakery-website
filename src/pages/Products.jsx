@@ -109,6 +109,11 @@ function Products() {
     setCategoriesLoading(false);
   };
 
+  // Refresh all products and categories
+  const refreshAll = async () => {
+    await Promise.all([fetchProducts(), fetchCategories()]);
+  };
+
   // Initial load
   useEffect(() => {
     let ignore = false;
