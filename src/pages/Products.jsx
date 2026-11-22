@@ -1,8 +1,11 @@
 
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 
 function Products() {
+  const navigate = useNavigate();
+
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -76,6 +79,7 @@ function Products() {
 
       if (form.image) {
         const fileExt = form.image.name.split(".").pop();
+
         const fileName = `${Date.now()}-${Math.random()
           .toString(36)
           .slice(2)}.${fileExt}`;
@@ -219,7 +223,9 @@ function Products() {
     setError("");
     setSuccess("");
 
-    const product = products.find((item) => item.id === id);
+    const product = products.find(
+      (item) => item.id === id
+    );
 
     try {
       const { error } = await supabase
@@ -231,7 +237,9 @@ function Products() {
 
       // Remove associated image from Storage
       if (product?.image_url) {
-        const imagePath = getStoragePath(product.image_url);
+        const imagePath = getStoragePath(
+          product.image_url
+        );
 
         if (imagePath) {
           const { error: storageError } = await supabase.storage
@@ -245,6 +253,7 @@ function Products() {
       }
 
       setSuccess("Product deleted successfully!");
+
       await fetchProducts();
     } catch (err) {
       setError(err.message || "Unable to delete product.");
@@ -260,9 +269,23 @@ function Products() {
 
   return (
     <div className="products-page">
-      <h1>Product Management</h1>
-      <p>Manage your bakery products here.</p>
 
+      {/* Header */}
+      <div className="products-header">
+        <div>
+          <h1>Product Management</h1>
+          <p>Manage your bakery products here.</p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => navigate("/admin/dashboard")}
+        >
+          ← Back to Dashboard
+        </button>
+      </div>
+
+      {/* Add / Edit Product */}
       <section>
         <h2>{editingId ? "Edit Product" : "Add New Product"}</h2>
 
@@ -339,6 +362,7 @@ function Products() {
         {success && <p style={{ color: "green" }}>{success}</p>}
       </section>
 
+      {/* All Products */}
       <section>
         <h2>All Products ({products.length})</h2>
 
