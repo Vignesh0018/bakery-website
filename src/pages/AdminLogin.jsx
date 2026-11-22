@@ -6,7 +6,9 @@ import "../styles/AdminLogin.css";
 function AdminLogin() {
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(
+    () => localStorage.getItem("golden_crust_admin_email") || ""
+  );
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberEmail, setRememberEmail] = useState(true);
@@ -17,12 +19,6 @@ function AdminLogin() {
   // Check if admin is already logged in
   useEffect(() => {
     let ignore = false;
-
-    // Load saved email if remembered
-    const savedEmail = localStorage.getItem("golden_crust_admin_email");
-    if (savedEmail) {
-      setEmail(savedEmail);
-    }
 
     const checkExistingAuth = async () => {
       try {
