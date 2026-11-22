@@ -150,6 +150,9 @@ function AdminDashboard() {
             <button onClick={() => navigate("/admin/settings")}>
               Settings
             </button>
+            <button onClick={() => navigate("/admin/categories")}>
+  Categories
+</button>
 
           </nav>
         </aside>
