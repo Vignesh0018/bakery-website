@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import "../styles/Orders.css";
@@ -66,95 +65,183 @@ function Orders() {
 
   return (
     <div className="orders-page">
-      <h1>Orders Management</h1>
-      <p>View and manage customer orders.</p>
 
-      <button onClick={fetchOrders}>
-        Refresh Orders
-      </button>
+      {/* Header */}
+      <div className="orders-header">
+        <div>
+          <h1>Orders Management</h1>
+          <p>View and manage customer orders.</p>
+        </div>
 
+        <button onClick={fetchOrders}>
+          Refresh Orders
+        </button>
+      </div>
+
+      {/* Error */}
       {error && (
-        <p style={{ color: "red" }}>{error}</p>
+        <div className="orders-error">
+          {error}
+        </div>
       )}
 
+      {/* Loading */}
       {loading ? (
-        <p>Loading orders...</p>
+        <div className="no-orders">
+          Loading orders...
+        </div>
       ) : orders.length === 0 ? (
-        <p>No orders found yet.</p>
+        <div className="no-orders">
+          <h2>No Orders Yet</h2>
+          <p>Customer orders will appear here.</p>
+        </div>
       ) : (
-        orders.map((order) => (
-          <div
-            key={order.id}
-            style={{
-              border: "1px solid #ddd",
-              padding: "20px",
-              margin: "15px 0",
-              borderRadius: "10px",
-            }}
-          >
-            <h2>Order #{order.id}</h2>
 
-            <p>
-              Customer: {order.customer_name}
-            </p>
+        /* Orders */
+        <div className="orders-list">
 
-            <p>
-              Phone: {order.phone}
-            </p>
+          {orders.map((order) => {
 
-            <p>
-              Address: {order.address || "Not provided"}
-            </p>
+            const items = Array.isArray(order.items)
+              ? order.items
+              : [];
 
-            <h3>Ordered Items</h3>
+            return (
+              <div className="order-card" key={order.id}>
 
-            <pre style={{ whiteSpace: "pre-wrap" }}>
-              {JSON.stringify(order.items, null, 2)}
-            </pre>
+                {/* Order Header */}
+                <div className="order-card-header">
+                  <h3>Order #{order.id}</h3>
 
-            <p>
-              Total: ₹{order.total_amount}
-            </p>
+                  <select
+                    className="order-status"
+                    value={order.order_status}
+                    onChange={(e) =>
+                      updateStatus(order.id, e.target.value)
+                    }
+                  >
+                    <option value="Pending">Pending</option>
+                    <option value="Confirmed">Confirmed</option>
+                    <option value="Preparing">Preparing</option>
+                    <option value="Ready">Ready</option>
+                    <option value="Delivered">Delivered</option>
+                    <option value="Cancelled">Cancelled</option>
+                  </select>
+                </div>
 
-            <p>
-              Payment: {order.payment_method}
-            </p>
+                {/* Customer Details */}
+                <div className="order-details">
 
-            <p>
-              Notes: {order.notes || "None"}
-            </p>
+                  <div>
+                    <p>
+                      <strong>Customer:</strong>{" "}
+                      {order.customer_name}
+                    </p>
 
-            <p>
-              Date: {new Date(order.created_at).toLocaleString("en-IN")}
-            </p>
+                    <p>
+                      <strong>Phone:</strong>{" "}
+                      {order.phone}
+                    </p>
 
-            <label>Order Status: </label>
+                    <p>
+                      <strong>Address:</strong>{" "}
+                      {order.address || "Not provided"}
+                    </p>
+                  </div>
 
-            <select
-              value={order.order_status}
-              onChange={(e) =>
-                updateStatus(order.id, e.target.value)
-              }
-            >
-              <option value="Pending">Pending</option>
-              <option value="Confirmed">Confirmed</option>
-              <option value="Preparing">Preparing</option>
-              <option value="Ready">Ready</option>
-              <option value="Delivered">Delivered</option>
-              <option value="Cancelled">Cancelled</option>
-            </select>
+                  <div>
+                    <p>
+                      <strong>Order Date:</strong>{" "}
+                      {new Date(order.created_at).toLocaleString("en-IN")}
+                    </p>
 
-            <br />
-            <br />
+                    <p>
+                      <strong>Payment:</strong>{" "}
+                      {order.payment_method}
+                    </p>
 
-            <button
-              onClick={() => deleteOrder(order.id)}
-            >
-              Delete Order
-            </button>
-          </div>
-        ))
+                    <p>
+                      <strong>Total:</strong>{" "}
+                      ₹{Number(order.total_amount || 0).toLocaleString("en-IN")}
+                    </p>
+                  </div>
+
+                </div>
+
+                {/* Ordered Items */}
+                <div className="order-items">
+
+                  <h4>Ordered Items</h4>
+
+                  {items.length === 0 ? (
+                    <p>No item details available.</p>
+                  ) : (
+                    items.map((item, index) => (
+                      <div className="order-item" key={index}>
+
+                        <h5>
+                          {item.product || "Custom Cake"}
+                        </h5>
+
+                        <p>
+                          <strong>Flavour:</strong>{" "}
+                          {item.flavour || "Not specified"}
+                        </p>
+
+                        <p>
+                          <strong>Weight:</strong>{" "}
+                          {item.weight || "Not specified"}
+                        </p>
+
+                        <p>
+                          <strong>Quantity:</strong>{" "}
+                          {item.quantity || 1}
+                        </p>
+
+                        <p>
+                          <strong>Required Date:</strong>{" "}
+                          {item.required_date || "Not specified"}
+                        </p>
+
+                        <p>
+                          <strong>Cake Message:</strong>{" "}
+                          {item.cake_message || "No message"}
+                        </p>
+
+                        <p>
+                          <strong>Order Type:</strong>{" "}
+                          {item.delivery_type || "Not specified"}
+                        </p>
+
+                      </div>
+                    ))
+                  )}
+
+                </div>
+
+                {/* Notes */}
+                <div className="order-notes">
+                  <strong>Notes:</strong>{" "}
+                  {order.notes || "None"}
+                </div>
+
+                {/* Delete */}
+                <div className="order-actions">
+                  <button
+                    className="delete-order-btn"
+                    onClick={() => deleteOrder(order.id)}
+                  >
+                    Delete Order
+                  </button>
+                </div>
+
+              </div>
+            );
+          })}
+
+        </div>
       )}
+
     </div>
   );
 }
