@@ -79,7 +79,35 @@ function Inventory() {
   };
 
   useEffect(() => {
-    fetchInventory();
+    let ignore = false;
+
+    const loadData = async () => {
+      try {
+        const { data, error: fetchErr } = await supabase
+          .from("inventory")
+          .select("*")
+          .order("item_name", { ascending: true });
+
+        if (!ignore) {
+          if (fetchErr) throw fetchErr;
+          setInventory(data || []);
+        }
+      } catch (err) {
+        if (!ignore) {
+          setError(err.message || "Failed to load inventory items.");
+        }
+      } finally {
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadData();
+
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   // Form input changes
