@@ -1,15 +1,19 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { supabase } from "../lib/supabase";
 import "../styles/Order.css";
 
 function Order() {
   const [submitting, setSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     if (submitting) return;
 
+    setSuccessMessage("");
+    setErrorMessage("");
     setSubmitting(true);
 
     try {
@@ -43,48 +47,48 @@ function Order() {
           address: null,
           items: orderItems,
           total_amount: 0,
-          payment_method: "Not specified",
+          payment_method: "WhatsApp / Direct Confirmation",
           order_status: "Pending",
-          notes: `Custom cake order | Required date: ${date} | ${delivery}`,
+          notes: `Custom cake order | Date: ${date} | Type: ${delivery}`,
         },
       ]);
 
       if (error) {
         console.error("Order database error:", error);
-        alert("Unable to save your order. Please try again.");
+        setErrorMessage("Unable to save your order to our system. Please reach out via WhatsApp directly.");
         return;
       }
 
-      // WhatsApp message
+      // Format WhatsApp message
       const whatsappNumber = "919876543210";
 
-      const orderMessage = `
-Hello The Golden Crust!
+      const orderMessage = `Hello The Golden Crust!
 
-I would like to place a custom cake order.
-
+I would like to place a custom cake order:
 Customer Name: ${name}
 Phone Number: ${phone}
 Cake Flavour: ${flavour}
 Cake Weight: ${weight}
 Required Date: ${date}
 Cake Message: ${message || "No message"}
-Order Type: ${delivery}
+Delivery Type: ${delivery}
 
-Please confirm the price and availability.
-`;
+Please confirm price and availability. Thank you!`;
 
-      const whatsappURL =
-        `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(orderMessage)}`;
+      const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
+        orderMessage
+      )}`;
 
       window.open(whatsappURL, "_blank");
 
-      alert("Your order has been saved successfully!");
+      setSuccessMessage(
+        "🎉 Your cake request has been submitted! WhatsApp has been opened to finalize your details."
+      );
 
       event.target.reset();
-    } catch (error) {
-      console.error("Unexpected order error:", error);
-      alert("Something went wrong. Please try again.");
+    } catch (err) {
+      console.error("Unexpected order error:", err);
+      setErrorMessage("Something went wrong. Please call or WhatsApp us directly.");
     } finally {
       setSubmitting(false);
     }
@@ -95,104 +99,124 @@ Please confirm the price and availability.
       <div className="order-heading">
         <p>CUSTOM CAKE ORDERS</p>
         <h2>Make Your Celebration Special</h2>
-        <span>
-          Tell us your dream cake. We'll make it happen.
-        </span>
+        <span>Tell us your dream cake. We&apos;ll bake it fresh for your special day.</span>
       </div>
 
-      <form className="order-form" onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label>Customer Name</label>
-          <input
-            type="text"
-            name="name"
-            placeholder="Enter your name"
-            required
-          />
-        </div>
+      <div className="order-form-container">
+        {successMessage && (
+          <div className="order-banner-success">
+            {successMessage}
+          </div>
+        )}
 
-        <div className="form-group">
-          <label>Phone Number</label>
-          <input
-            type="tel"
-            name="phone"
-            placeholder="Enter your phone number"
-            pattern="[0-9]{10}"
-            title="Enter a 10-digit phone number"
-            required
-          />
-        </div>
+        {errorMessage && (
+          <div className="order-banner-error">
+            {errorMessage}
+          </div>
+        )}
 
-        <div className="form-group">
-          <label>Cake Flavour</label>
-          <select name="flavour" required>
-            <option value="">Choose flavour</option>
-            <option>Chocolate</option>
-            <option>Black Forest</option>
-            <option>White Forest</option>
-            <option>Butterscotch</option>
-            <option>Vanilla</option>
-            <option>Red Velvet</option>
-          </select>
-        </div>
+        <form className="order-form" onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="order-cust-name">Customer Name</label>
+            <input
+              id="order-cust-name"
+              type="text"
+              name="name"
+              placeholder="e.g. Ananya Sharma"
+              required
+            />
+          </div>
 
-        <div className="form-group">
-          <label>Cake Weight</label>
-          <select name="weight" required>
-            <option value="">Choose weight</option>
-            <option>500 Grams</option>
-            <option>1 KG</option>
-            <option>1.5 KG</option>
-            <option>2 KG</option>
-            <option>3 KG</option>
-          </select>
-        </div>
+          <div className="form-group">
+            <label htmlFor="order-cust-phone">Phone Number</label>
+            <input
+              id="order-cust-phone"
+              type="tel"
+              name="phone"
+              placeholder="10-digit mobile number"
+              pattern="[0-9]{10}"
+              title="Enter a 10-digit phone number"
+              required
+            />
+          </div>
 
-        <div className="form-group">
-          <label>Required Date</label>
-          <input
-            type="date"
-            name="date"
-            min={new Date().toLocaleDateString("en-CA")}
-            required
-          />
-        </div>
+          <div className="form-group">
+            <label htmlFor="order-cake-flavour">Cake Flavour</label>
+            <select id="order-cake-flavour" name="flavour" required>
+              <option value="">Choose a signature flavour</option>
+              <option>Belgian Dark Chocolate</option>
+              <option>Classic Black Forest</option>
+              <option>White Forest & Berry</option>
+              <option>Caramel Butterscotch</option>
+              <option>Madagascar Vanilla</option>
+              <option>Red Velvet Cream Cheese</option>
+              <option>Fresh Fruit Gateau</option>
+            </select>
+          </div>
 
-        <div className="form-group">
-          <label>Message on Cake</label>
-          <input
-            type="text"
-            name="message"
-            placeholder="Example: Happy Birthday!"
-          />
-        </div>
+          <div className="form-group">
+            <label htmlFor="order-cake-weight">Cake Weight / Size</label>
+            <select id="order-cake-weight" name="weight" required>
+              <option value="">Choose weight</option>
+              <option>500 Grams (Serves 4–6)</option>
+              <option>1 KG (Serves 8–10)</option>
+              <option>1.5 KG (Serves 12–15)</option>
+              <option>2 KG (Serves 16–20)</option>
+              <option>3 KG (Serves 25+)</option>
+            </select>
+          </div>
 
-        <div className="form-group full-width">
-          <label>Upload Cake Reference Image</label>
-          <input
-            type="file"
-            name="reference"
-            accept="image/*"
-          />
-        </div>
+          <div className="form-group">
+            <label htmlFor="order-cake-date">Required Date</label>
+            <input
+              id="order-cake-date"
+              type="date"
+              name="date"
+              min={new Date().toLocaleDateString("en-CA")}
+              required
+            />
+          </div>
 
-        <div className="form-group full-width">
-          <label>Pickup or Delivery</label>
-          <select name="delivery" required>
-            <option value="">Choose an option</option>
-            <option>Store Pickup</option>
-            <option>Home Delivery</option>
-          </select>
-        </div>
+          <div className="form-group">
+            <label htmlFor="order-cake-message">Message on Cake (Optional)</label>
+            <input
+              id="order-cake-message"
+              type="text"
+              name="message"
+              placeholder="e.g. Happy Birthday Arjun! 🎂"
+            />
+          </div>
 
-        <button
-          type="submit"
-          className="submit-order"
-          disabled={submitting}
-        >
-          {submitting ? "Submitting Order..." : "Order Now"}
-        </button>
-      </form>
+          <div className="form-group full-width">
+            <label htmlFor="order-cake-delivery">Order Fulfillment</label>
+            <select id="order-cake-delivery" name="delivery" required>
+              <option value="">Choose pickup or delivery</option>
+              <option>Store Pickup (Thiruthani Bakehouse)</option>
+              <option>Home Delivery</option>
+            </select>
+          </div>
+
+          <button
+            type="submit"
+            className="submit-order"
+            disabled={submitting}
+          >
+            {submitting ? "Submitting Order Request..." : "🎂 Send Cake Order via WhatsApp"}
+          </button>
+        </form>
+
+        <div className="order-trust-badges">
+          <div className="order-trust-item">
+            <span>✨ 100% Fresh Daily Bake</span>
+          </div>
+          <div className="order-trust-item">
+            <span>🌱 Eggless Options Available</span>
+          </div>
+          <div className="order-trust-item">
+            <span>💬 Instant WhatsApp Confirmation</span>
+          </div>
+        </div>
+      </div>
     </section>
   );
 }
