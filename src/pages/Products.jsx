@@ -8,11 +8,14 @@ function Products() {
   const navigate = useNavigate();
 
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [updatingAvailability, setUpdatingAvailability] = useState(null);
   const [error, setError] = useState("");
+  const [categoryError, setCategoryError] = useState("");
   const [success, setSuccess] = useState("");
 
   const emptyForm = {
@@ -25,6 +28,7 @@ function Products() {
 
   const [form, setForm] = useState(emptyForm);
 
+  // Fetch products
   const fetchProducts = async () => {
     setLoading(true);
 
@@ -42,8 +46,28 @@ function Products() {
     setLoading(false);
   };
 
+  // Fetch categories from Supabase
+  const fetchCategories = async () => {
+    setCategoriesLoading(true);
+    setCategoryError("");
+
+    const { data, error } = await supabase
+      .from("categories")
+      .select("*")
+      .order("name", { ascending: true });
+
+    if (error) {
+      setCategoryError(error.message);
+    } else {
+      setCategories(data || []);
+    }
+
+    setCategoriesLoading(false);
+  };
+
   useEffect(() => {
     fetchProducts();
+    fetchCategories();
   }, []);
 
   const handleChange = (e) => {
@@ -65,6 +89,7 @@ function Products() {
     );
   };
 
+  // Add or update product
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -196,6 +221,7 @@ function Products() {
     }
   };
 
+  // Edit product
   const handleEdit = (product) => {
     setForm({
       name: product.name,
@@ -215,6 +241,7 @@ function Products() {
     });
   };
 
+  // Delete product image
   const handleDeleteImage = async (product) => {
     const confirmed = window.confirm(
       `Delete the image for ${product.name}?`
@@ -251,6 +278,7 @@ function Products() {
     }
   };
 
+  // Delete product
   const handleDelete = async (id) => {
     const confirmed = window.confirm(
       "Are you sure you want to delete this product?"
@@ -298,6 +326,7 @@ function Products() {
     }
   };
 
+  // Cancel editing
   const cancelEdit = () => {
     setForm(emptyForm);
     setEditingId(null);
@@ -355,18 +384,45 @@ function Products() {
             required
           />
 
+          {/* Dynamic Category Dropdown */}
           <select
             name="category"
             value={form.category}
             onChange={handleChange}
             required
+            disabled={categoriesLoading}
           >
-            <option value="">Select Category</option>
-            <option value="CAKES">Cakes</option>
-            <option value="PASTRIES">Pastries</option>
-            <option value="BREADS">Breads</option>
-            <option value="COOKIES">Cookies</option>
+            <option value="">
+              {categoriesLoading
+                ? "Loading categories..."
+                : "Select Category"}
+            </option>
+
+            {categories.map((category) => (
+              <option
+                key={category.id}
+                value={category.name}
+              >
+                {category.name}
+              </option>
+            ))}
+
+            {/* Preserve existing category when editing */}
+            {form.category &&
+              !categories.some(
+                (category) => category.name === form.category
+              ) && (
+                <option value={form.category}>
+                  {form.category} (Existing)
+                </option>
+              )}
           </select>
+
+          {categoryError && (
+            <p style={{ color: "red" }}>
+              Unable to load categories: {categoryError}
+            </p>
+          )}
 
           <label>Product Image</label>
 
