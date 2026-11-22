@@ -13,6 +13,7 @@ function AdminDashboard() {
     totalOrders: 0,
     pendingOrders: 0,
     totalCustomers: 0,
+    totalInventory: 0,
   });
 
   // Fetch dashboard statistics
@@ -22,6 +23,7 @@ function AdminDashboard() {
       ordersResult,
       pendingResult,
       customersResult,
+      inventoryResult,
     ] = await Promise.all([
       supabase
         .from("products")
@@ -39,6 +41,10 @@ function AdminDashboard() {
       supabase
         .from("orders")
         .select("phone"),
+
+      supabase
+        .from("inventory")
+        .select("*", { count: "exact", head: true }),
     ]);
 
     if (
@@ -52,6 +58,7 @@ function AdminDashboard() {
         ordersResult,
         pendingResult,
         customersResult,
+        inventoryResult,
       });
       return;
     }
@@ -65,6 +72,7 @@ function AdminDashboard() {
       totalOrders: ordersResult.count || 0,
       pendingOrders: pendingResult.count || 0,
       totalCustomers: uniqueCustomers.size,
+      totalInventory: inventoryResult?.count || 0,
     });
   };
 
@@ -190,6 +198,16 @@ function AdminDashboard() {
             <div className="stat-card">
               <h3>Customers</h3>
               <p>{stats.totalCustomers}</p>
+            </div>
+
+            <div
+              className="stat-card"
+              onClick={() => navigate("/admin/inventory")}
+              style={{ cursor: "pointer" }}
+              title="Click to view Inventory"
+            >
+              <h3>Inventory Items</h3>
+              <p>{stats.totalInventory}</p>
             </div>
           </div>
 
