@@ -15,7 +15,7 @@ import Categories from "./pages/Categories";
 
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
-import Adminproducts from "./pages/"
+import Adminproducts from "./pages/Customers";
 
 
 function CustomerWebsite() {
@@ -43,6 +43,7 @@ function App() {
         <Route path="/admin/products" element={<Products />} />
         <Route path="/admin/orders" element={<Orders />} />
         <Route path="/admin/categories" element={<Categories />} />
+        <
       </Routes>
     </BrowserRouter>
   );
