@@ -11,6 +11,7 @@ import Contact from "./pages/Contact";
 import Footer from "./components/Footer";
 import Products from "./pages/Products";
 import Orders from "./pages/Orders";
+import Categories from "./pages/Categories";
 
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
