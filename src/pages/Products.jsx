@@ -541,7 +541,7 @@ function Products() {
           <button
             type="button"
             className="products-btn products-btn-secondary"
-            onClick={fetchProducts}
+            onClick={refreshAll}
             disabled={loading}
           >
             🔄 {loading ? "Refreshing..." : "Refresh"}
