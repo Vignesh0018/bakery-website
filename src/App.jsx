@@ -12,6 +12,7 @@ import Footer from "./components/Footer";
 import Products from "./pages/Products";
 import Orders from "./pages/Orders";
 import Categories from "./pages/Categories";
+import Inventory from "./pages/Inventory";
 
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -44,6 +45,7 @@ function App() {
         <Route path="/admin/orders" element={<Orders />} />
         <Route path="/admin/categories" element={<Categories />} />
         <Route path="/admin/customers" element={<Adminproducts />} />
+        <Route path="/admin/inventory" element={<Inventory />} />
       </Routes>
     </BrowserRouter>
   );
