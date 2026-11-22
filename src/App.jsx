@@ -15,7 +15,7 @@ import Categories from "./pages/Categories";
 
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
-import Adm
+import Adminproducts from "./pages/"
 
 
 function CustomerWebsite() {
