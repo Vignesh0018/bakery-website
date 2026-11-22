@@ -1,48 +1,48 @@
-
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { supabase } from "../lib/supabase";
 import "../styles/Menu.css";
 
 function Menu() {
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const products = [
-    
-    {
-      name: "Chocolate Cake",
-      category: "CAKES",
-      price: "₹450",
-      dietary: "Eggless Available",
-      image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600",
-    },
-    {
-      name: "Butter Croissant",
-      category: "PASTRIES",
-      price: "₹80",
-      dietary: "Contains Dairy",
-      image: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=600",
-    },
-    {
-      name: "Fresh Bread",
-      category: "BREADS",
-      price: "₹60",
-      dietary: "Vegetarian",
-      image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600",
-    },
-    {
-      name: "Chocolate Cookies",
-      category: "COOKIES",
-      price: "₹120",
-      dietary: "Contains Gluten",
-      image: "https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=600",
-    },
+  // Fetch products from Supabase
+  const fetchProducts = async () => {
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .eq("is_available", true)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      setError(error.message);
+    } else {
+      setProducts(data || []);
+      setError("");
+    }
+
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  // Dynamic categories
+  const categories = [
+    "All",
+    ...new Set(products.map((product) => product.category)),
   ];
 
-  const categories = ["All", "CAKES", "PASTRIES", "BREADS", "COOKIES"];
-
+  // Filter products
   const filteredProducts =
     selectedCategory === "All"
       ? products
-      : products.filter((product) => product.category === selectedCategory);
+      : products.filter(
+          (product) => product.category === selectedCategory
+        );
 
   return (
     <section className="menu-section" id="menu">
@@ -54,6 +54,7 @@ function Menu() {
         Discover our freshly prepared bakery favourites.
       </p>
 
+      {/* Category filters */}
       <div className="category-filters">
         {categories.map((category) => (
           <button
@@ -66,20 +67,42 @@ function Menu() {
         ))}
       </div>
 
+      {/* Products */}
       <div className="product-grid">
-        {filteredProducts.map((product, index) => (
-          <div className="product-card" key={index}>
-            <img src={product.image} alt={product.name} />
+        {loading ? (
+          <p>Loading products...</p>
+        ) : error ? (
+          <p>Unable to load products: {error}</p>
+        ) : filteredProducts.length === 0 ? (
+          <p>No products available in this category.</p>
+        ) : (
+          filteredProducts.map((product) => (
+            <div className="product-card" key={product.id}>
+              {product.image_url && (
+                <img
+                  src={product.image_url}
+                  alt={product.name}
+                />
+              )}
 
-            <div className="product-info">
-              <p>{product.category}</p>
-              <h3>{product.name}</h3>
-              <h4>{product.price}</h4>
+              <div className="product-info">
+                <p>{product.category}</p>
 
-              <span className="dietary-label">{product.dietary}</span>
+                <h3>{product.name}</h3>
+
+                <h4>
+                  ₹{Number(product.price).toLocaleString("en-IN")}
+                </h4>
+
+                {product.description && (
+                  <span className="dietary-label">
+                    {product.description}
+                  </span>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </section>
   );
