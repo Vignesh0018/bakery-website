@@ -160,6 +160,42 @@ function Products() {
     }
   };
 
+  // Toggle product availability
+  const handleToggleAvailability = async (product) => {
+    setError("");
+    setSuccess("");
+    setUpdatingAvailability(product.id);
+
+    try {
+      const newAvailability = !product.is_available;
+
+      const { error } = await supabase
+        .from("products")
+        .update({ is_available: newAvailability })
+        .eq("id", product.id);
+
+      if (error) throw error;
+
+      setProducts((prevProducts) =>
+        prevProducts.map((item) =>
+          item.id === product.id
+            ? { ...item, is_available: newAvailability }
+            : item
+        )
+      );
+
+      setSuccess(
+        `${product.name} is now ${
+          newAvailability ? "Available" : "Unavailable"
+        }.`
+      );
+    } catch (err) {
+      setError(err.message || "Unable to update availability.");
+    } finally {
+      setUpdatingAvailability(null);
+    }
+  };
+
   const handleEdit = (product) => {
     setForm({
       name: product.name,
