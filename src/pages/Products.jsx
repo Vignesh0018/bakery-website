@@ -439,6 +439,33 @@ function Products() {
               <p>Price: ₹{product.price}</p>
               <p>Category: {product.category}</p>
 
+              {/* Availability Status */}
+              <p>
+                Status:{" "}
+                <strong
+                  style={{
+                    color: product.is_available ? "green" : "red",
+                  }}
+                >
+                  {product.is_available
+                    ? "Available"
+                    : "Unavailable"}
+                </strong>
+              </p>
+
+              {/* Availability Toggle */}
+              <button
+                type="button"
+                onClick={() => handleToggleAvailability(product)}
+                disabled={updatingAvailability === product.id}
+              >
+                {updatingAvailability === product.id
+                  ? "Updating..."
+                  : product.is_available
+                    ? "Mark Unavailable"
+                    : "Mark Available"}
+              </button>
+
               <button onClick={() => handleEdit(product)}>
                 Edit
               </button>
