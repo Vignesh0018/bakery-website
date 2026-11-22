@@ -1,7 +1,11 @@
+/* ==========================================================================
+   Order (Custom Cake) Section Styles - The Golden Crust Bakery
+   ========================================================================== */
 
 .order-section {
   padding: 100px 8%;
-  background: #f5eadc;
+  background: #f7ede1;
+  box-sizing: border-box;
 }
 
 .order-heading {
@@ -10,86 +14,184 @@
 }
 
 .order-heading p {
-  color: #a66b42;
+  color: #8b5e3c;
   letter-spacing: 4px;
-  font-weight: bold;
+  font-weight: 800;
   font-size: 13px;
+  text-transform: uppercase;
+  display: inline-block;
+  padding: 6px 14px;
+  background: rgba(139, 94, 60, 0.1);
+  border-radius: 20px;
+  margin: 0 0 14px 0;
 }
 
 .order-heading h2 {
   color: #432719;
-  font-size: 40px;
-  margin: 18px 0;
+  font-size: clamp(32px, 4vw, 44px);
+  margin: 0 0 14px 0;
+  font-weight: 800;
+  letter-spacing: -0.5px;
 }
 
 .order-heading span {
-  color: #806c5d;
+  color: #725847;
+  font-size: 16px;
+}
+
+/* Order Form Card */
+.order-form-container {
+  max-width: 860px;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 24px;
+  border: 1px solid #ead9c8;
+  padding: 45px;
+  box-shadow: 0 8px 30px rgba(67, 39, 25, 0.08);
+  box-sizing: border-box;
+}
+
+/* Order Feedback Banners */
+.order-banner-success {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #c8e6c9;
+  padding: 16px 20px;
+  border-radius: 12px;
+  margin-bottom: 25px;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.order-banner-error {
+  background: #ffebee;
+  color: #c62828;
+  border: 1px solid #ffcdd2;
+  padding: 16px 20px;
+  border-radius: 12px;
+  margin-bottom: 25px;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
 }
 
 .order-form {
-  max-width: 850px;
-  margin: auto;
-  padding: 40px;
-  background: #fffaf4;
-  border-radius: 12px;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 25px;
+  gap: 24px;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .form-group label {
   color: #432719;
-  font-weight: bold;
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
 }
 
 .form-group input,
 .form-group select {
-  padding: 14px;
-  border: 1px solid #ddcabb;
-  border-radius: 6px;
+  padding: 14px 16px;
+  border: 1px solid #dfcbbb;
+  border-radius: 10px;
   font-size: 15px;
-  background: white;
+  background: #fffdfb;
+  color: #432719;
   outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .form-group input:focus,
 .form-group select:focus {
-  border-color: #743e26;
+  border-color: #8b5e3c;
+  box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.15);
+}
+
+.form-group input[type="file"] {
+  background: #fdfaf6;
+  border: 2px dashed #d8c5b5;
+  cursor: pointer;
 }
 
 .full-width {
   grid-column: 1 / -1;
 }
 
+/* Submit Button */
 .submit-order {
   grid-column: 1 / -1;
-  padding: 17px;
-  background: #743e26;
-  color: white;
+  padding: 18px 28px;
+  background: #432719;
+  color: #fff8ef;
   border: none;
-  border-radius: 6px;
+  border-radius: 12px;
   font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
   cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 16px rgba(67, 39, 25, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
 }
 
-.submit-order:hover {
-  background: #a66b42;
+.submit-order:hover:not(:disabled) {
+  background: #8b5e3c;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(67, 39, 25, 0.25);
 }
 
-@media (max-width: 650px) {
-  .order-form {
-    grid-template-columns: 1fr;
-    padding: 25px;
+.submit-order:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Order Footer Trust Badges */
+.order-trust-badges {
+  margin-top: 28px;
+  padding-top: 22px;
+  border-top: 1px solid #f0e2d2;
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 16px;
+  text-align: center;
+}
+
+.order-trust-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #654b3a;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .order-section {
+    padding: 70px 5%;
   }
 
-  .order-heading h2 {
-    font-size: 30px;
+  .order-form-container {
+    padding: 30px 22px;
+  }
+
+  .order-form {
+    grid-template-columns: 1fr;
+    gap: 18px;
   }
 
   .full-width,
@@ -98,83 +200,13 @@
   }
 }
 
-
-/* Tablet responsiveness */
-@media (max-width: 900px) {
+@media (max-width: 500px) {
   .order-section {
-    padding: 75px 5%;
+    padding: 50px 4%;
   }
 
-  .order-form {
-    max-width: 700px;
-    padding: 30px;
-    gap: 20px;
-  }
-}
-
-/* Mobile responsiveness */
-@media (max-width: 650px) {
-  .order-section {
-    padding: 55px 5%;
-  }
-
-  .order-heading {
-    margin-bottom: 30px;
-  }
-
-  .order-heading p {
-    font-size: 11px;
-    letter-spacing: 2px;
-  }
-
-  .order-heading h2 {
-    font-size: 28px;
-    line-height: 1.3;
-  }
-
-  .order-heading span {
-    font-size: 14px;
-    line-height: 1.6;
-  }
-
-  .order-form {
-    width: 100%;
-    box-sizing: border-box;
-    grid-template-columns: 1fr;
-    padding: 22px 16px;
-    gap: 20px;
-  }
-
-  .form-group {
-    min-width: 0;
-  }
-
-  .form-group label {
-    font-size: 14px;
-  }
-
-  .form-group input,
-  .form-group select,
-  .form-group textarea {
-    width: 100%;
-    min-width: 0;
-    box-sizing: border-box;
-    padding: 13px;
-    font-size: 16px;
-  }
-
-  .form-group input[type="file"] {
-    font-size: 13px;
-  }
-
-  .full-width,
-  .submit-order {
-    grid-column: 1;
-  }
-
-  .submit-order {
-    width: 100%;
-    padding: 16px;
-    font-size: 15px;
+  .order-trust-badges {
+    flex-direction: column;
+    align-items: center;
   }
 }
