@@ -11,6 +11,7 @@ function Products() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [updatingAvailability, setUpdatingAvailability] = useState(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
