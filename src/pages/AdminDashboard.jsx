@@ -7,108 +7,130 @@ function AdminDashboard() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [adminEmail, setAdminEmail] = useState("");
+  const [recentOrders, setRecentOrders] = useState([]);
 
   const [stats, setStats] = useState({
     totalProducts: 0,
+    totalCategories: 0,
     totalOrders: 0,
     pendingOrders: 0,
     totalCustomers: 0,
     totalInventory: 0,
+    lowStockCount: 0,
+    totalRevenue: 0,
   });
 
   // Fetch dashboard statistics
   const fetchStats = async () => {
-    const [
-      productsResult,
-      ordersResult,
-      pendingResult,
-      customersResult,
-      inventoryResult,
-    ] = await Promise.all([
-      supabase
-        .from("products")
-        .select("*", { count: "exact", head: true }),
-
-      supabase
-        .from("orders")
-        .select("*", { count: "exact", head: true }),
-
-      supabase
-        .from("orders")
-        .select("*", { count: "exact", head: true })
-        .eq("order_status", "Pending"),
-
-      supabase
-        .from("orders")
-        .select("phone"),
-
-      supabase
-        .from("inventory")
-        .select("*", { count: "exact", head: true }),
-    ]);
-
-    if (
-      productsResult.error ||
-      ordersResult.error ||
-      pendingResult.error ||
-      customersResult.error
-    ) {
-      console.error("Statistics error:", {
+    try {
+      const [
         productsResult,
-        ordersResult,
+        categoriesResult,
+        ordersCountResult,
         pendingResult,
-        customersResult,
+        allOrdersResult,
         inventoryResult,
+        recentOrdersResult,
+      ] = await Promise.all([
+        supabase.from("products").select("*", { count: "exact", head: true }),
+        supabase.from("categories").select("*", { count: "exact", head: true }),
+        supabase.from("orders").select("*", { count: "exact", head: true }),
+        supabase
+          .from("orders")
+          .select("*", { count: "exact", head: true })
+          .eq("order_status", "Pending"),
+        supabase.from("orders").select("phone, total_amount, order_status"),
+        supabase.from("inventory").select("quantity, minimum_stock"),
+        supabase
+          .from("orders")
+          .select("id, customer_name, phone, total_amount, order_status, created_at")
+          .order("created_at", { ascending: false })
+          .limit(5),
+      ]);
+
+      const uniqueCustomers = new Set(
+        (allOrdersResult.data || []).map((order) => order.phone)
+      );
+
+      // Revenue sum
+      let revenue = 0;
+      (allOrdersResult.data || []).forEach((order) => {
+        if (order.order_status !== "Cancelled") {
+          revenue += Number(order.total_amount || 0);
+        }
       });
-      return;
+
+      // Low stock count
+      let lowCount = 0;
+      (inventoryResult.data || []).forEach((item) => {
+        if (Number(item.quantity) <= Number(item.minimum_stock)) {
+          lowCount += 1;
+        }
+      });
+
+      setStats({
+        totalProducts: productsResult.count || 0,
+        totalCategories: categoriesResult.count || 0,
+        totalOrders: ordersCountResult.count || 0,
+        pendingOrders: pendingResult.count || 0,
+        totalCustomers: uniqueCustomers.size,
+        totalInventory: inventoryResult.data ? inventoryResult.data.length : 0,
+        lowStockCount: lowCount,
+        totalRevenue: revenue,
+      });
+
+      setRecentOrders(recentOrdersResult.data || []);
+    } catch (err) {
+      console.error("Dashboard statistics error:", err);
     }
-
-    const uniqueCustomers = new Set(
-      (customersResult.data || []).map((order) => order.phone)
-    );
-
-    setStats({
-      totalProducts: productsResult.count || 0,
-      totalOrders: ordersResult.count || 0,
-      pendingOrders: pendingResult.count || 0,
-      totalCustomers: uniqueCustomers.size,
-      totalInventory: inventoryResult?.count || 0,
-    });
   };
 
   // Verify admin and load dashboard
   useEffect(() => {
+    let ignore = false;
+
     const verifyAdmin = async () => {
-      const {
-        data: { user },
-        error: authError,
-      } = await supabase.auth.getUser();
+      try {
+        const {
+          data: { user },
+          error: authError,
+        } = await supabase.auth.getUser();
 
-      if (authError || !user) {
-        navigate("/admin/login", { replace: true });
-        return;
+        if (authError || !user) {
+          if (!ignore) navigate("/admin/login", { replace: true });
+          return;
+        }
+
+        const { data: adminRecord, error: adminErr } = await supabase
+          .from("admin_users")
+          .select("user_id")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        if (adminErr || !adminRecord) {
+          await supabase.auth.signOut();
+          if (!ignore) navigate("/admin/login", { replace: true });
+          return;
+        }
+
+        if (!ignore) {
+          setAdminEmail(user.email || "");
+          await fetchStats();
+        }
+      } catch (err) {
+        console.error("Admin verification error:", err);
+      } finally {
+        if (!ignore) {
+          setLoading(false);
+        }
       }
-
-      const { data, error } = await supabase
-        .from("admin_users")
-        .select("user_id")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      if (error || !data) {
-        await supabase.auth.signOut();
-        navigate("/admin/login", { replace: true });
-        return;
-      }
-
-      setAdminEmail(user.email || "");
-
-      await fetchStats();
-
-      setLoading(false);
     };
 
     verifyAdmin();
+
+    return () => {
+      ignore = true;
+    };
   }, [navigate]);
 
   const handleLogout = async () => {
@@ -116,116 +138,427 @@ function AdminDashboard() {
     navigate("/admin/login", { replace: true });
   };
 
+  // Time-based greeting helper
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 17) return "Good afternoon";
+    return "Good evening";
+  };
+
   if (loading) {
-    return <h2>Verifying admin access...</h2>;
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "#fff8ef",
+          color: "#432719",
+          fontFamily: "Arial, sans-serif",
+        }}
+      >
+        <h2>Verifying Administrator Access...</h2>
+      </div>
+    );
   }
 
   return (
     <div className="admin-dashboard">
-      <header>
-        <h1>THE GOLDEN CRUST.</h1>
-        <button onClick={handleLogout}>Logout</button>
+      {/* Top Header */}
+      <header className="admin-header">
+        <div className="admin-header-brand">
+          <span className="admin-header-logo">🥖</span>
+          <h1 className="admin-header-title">THE GOLDEN CRUST</h1>
+          <span className="admin-header-badge">Admin Hub</span>
+        </div>
+
+        <div className="admin-header-actions">
+          <button
+            type="button"
+            className="admin-header-btn admin-header-btn-ghost"
+            onClick={() => navigate("/")}
+            title="Open customer website"
+          >
+            🌐 View Website
+          </button>
+
+          <button
+            type="button"
+            className="admin-header-btn admin-header-btn-logout"
+            onClick={handleLogout}
+          >
+            🚪 Logout
+          </button>
+        </div>
       </header>
 
+      {/* Main Layout: Sidebar + Main Area */}
       <div className="admin-layout">
+        {/* Sidebar */}
         <aside className="admin-sidebar">
-          <h3>ADMIN PANEL</h3>
+          <div>
+            <div className="admin-sidebar-nav-title">Management</div>
+            <nav>
+              <button
+                type="button"
+                className="admin-sidebar-btn active"
+                onClick={() => navigate("/admin/dashboard")}
+              >
+                <span className="admin-sidebar-icon">📊</span>
+                Dashboard
+              </button>
 
-          <nav>
-            <button
-              className="active"
-              onClick={() => navigate("/admin/dashboard")}
-            >
-              Dashboard
-            </button>
+              <button
+                type="button"
+                className="admin-sidebar-btn"
+                onClick={() => navigate("/admin/products")}
+              >
+                <span className="admin-sidebar-icon">🍰</span>
+                Products
+              </button>
 
-            <button onClick={() => navigate("/admin/products")}>
-              Products
-            </button>
+              <button
+                type="button"
+                className="admin-sidebar-btn"
+                onClick={() => navigate("/admin/categories")}
+              >
+                <span className="admin-sidebar-icon">🏷️</span>
+                Categories
+              </button>
 
-            <button onClick={() => navigate("/admin/orders")}>
-              Orders
-            </button>
+              <button
+                type="button"
+                className="admin-sidebar-btn"
+                onClick={() => navigate("/admin/orders")}
+              >
+                <span className="admin-sidebar-icon">📦</span>
+                Orders
+              </button>
 
-            <button onClick={() => navigate("/admin/customers")}>
-              Customers
-            </button>
+              <button
+                type="button"
+                className="admin-sidebar-btn"
+                onClick={() => navigate("/admin/customers")}
+              >
+                <span className="admin-sidebar-icon">👥</span>
+                Customers
+              </button>
 
-            <button onClick={() => navigate("/admin/inventory")}>
-              Inventory
-            </button>
+              <button
+                type="button"
+                className="admin-sidebar-btn"
+                onClick={() => navigate("/admin/inventory")}
+              >
+                <span className="admin-sidebar-icon">🌾</span>
+                Inventory
+              </button>
+            </nav>
+          </div>
 
-            <button onClick={() => navigate("/admin/settings")}>
-              Settings
-            </button>
-            <button onClick={() => navigate("/admin/categories")}>
-  Categories
-</button>
-
-          </nav>
+          <div className="admin-sidebar-footer">
+            <span>The Golden Crust Bakery v1.0</span>
+          </div>
         </aside>
 
+        {/* Main Content Area */}
         <main className="admin-main">
-          <div className="admin-welcome" id="overview">
-            <h2>Welcome Back!</h2>
-            <p>Logged in as: {adminEmail}</p>
-            <p>Here's your bakery management overview.</p>
+          {/* Welcome Banner Box */}
+          <div className="admin-welcome-box">
+            <div className="admin-welcome-text">
+              <h2>
+                {getGreeting()}, Bakery Admin!
+              </h2>
+              <p>
+                Here is your live bakery overview, pending kitchen tickets, and store activity.
+              </p>
+              <div className="admin-user-pill">
+                👤 Logged in as: {adminEmail}
+              </div>
+            </div>
 
-            <button onClick={fetchStats}>
-              Refresh Dashboard
-            </button>
+            <div className="admin-welcome-actions">
+              <button
+                type="button"
+                className="admin-header-btn admin-header-btn-ghost"
+                style={{ background: "#432719", color: "#fff8ef" }}
+                onClick={fetchStats}
+              >
+                🔄 Refresh Metrics
+              </button>
+            </div>
           </div>
-        <button onClick={() => navigate("/")}>
-  Back to Website
-</button>  
 
-          <div className="admin-stats">
-            <div className="stat-card">
-              <h3>Total Products</h3>
-              <p>{stats.totalProducts}</p>
+          {/* Actionable Pending Orders Alert */}
+          {stats.pendingOrders > 0 && (
+            <div className="admin-alert-banner admin-alert-warning">
+              <span>
+                ⏳ <strong>Pending Orders:</strong> You have {stats.pendingOrders} order(s) waiting for kitchen confirmation.
+              </span>
+              <button
+                type="button"
+                className="admin-alert-action-btn"
+                onClick={() => navigate("/admin/orders")}
+              >
+                Review Orders ({stats.pendingOrders})
+              </button>
             </div>
+          )}
 
-            <div className="stat-card">
-              <h3>Total Orders</h3>
-              <p>{stats.totalOrders}</p>
+          {/* Actionable Low Stock Alert */}
+          {stats.lowStockCount > 0 && (
+            <div className="admin-alert-banner admin-alert-warning">
+              <span>
+                ⚠️ <strong>Inventory Alert:</strong> {stats.lowStockCount} ingredient(s) or supplies are at or below reorder threshold.
+              </span>
+              <button
+                type="button"
+                className="admin-alert-action-btn"
+                onClick={() => navigate("/admin/inventory")}
+              >
+                Check Stock ({stats.lowStockCount})
+              </button>
             </div>
+          )}
 
-            <div className="stat-card">
-              <h3>Pending Orders</h3>
-              <p>{stats.pendingOrders}</p>
-            </div>
-
-            <div className="stat-card">
-              <h3>Customers</h3>
-              <p>{stats.totalCustomers}</p>
-            </div>
-
+          {/* KPI Statistics Grid */}
+          <div className="admin-stats-grid">
+            {/* Products */}
             <div
-              className="stat-card"
+              className="dashboard-stat-card"
+              onClick={() => navigate("/admin/products")}
+              title="Click to view Products"
+            >
+              <div className="dashboard-stat-header">
+                <span className="dashboard-stat-title">Products</span>
+                <span className="dashboard-stat-icon">🍰</span>
+              </div>
+              <p className="dashboard-stat-value">{stats.totalProducts}</p>
+              <span className="dashboard-stat-desc">Menu items published</span>
+            </div>
+
+            {/* Categories */}
+            <div
+              className="dashboard-stat-card"
+              onClick={() => navigate("/admin/categories")}
+              title="Click to view Categories"
+            >
+              <div className="dashboard-stat-header">
+                <span className="dashboard-stat-title">Categories</span>
+                <span className="dashboard-stat-icon">🏷️</span>
+              </div>
+              <p className="dashboard-stat-value">{stats.totalCategories}</p>
+              <span className="dashboard-stat-desc">Menu classifications</span>
+            </div>
+
+            {/* Orders */}
+            <div
+              className="dashboard-stat-card"
+              onClick={() => navigate("/admin/orders")}
+              title="Click to view Orders"
+            >
+              <div className="dashboard-stat-header">
+                <span className="dashboard-stat-title">Total Orders</span>
+                <span className="dashboard-stat-icon">📦</span>
+              </div>
+              <p className="dashboard-stat-value">{stats.totalOrders}</p>
+              <span className="dashboard-stat-desc">Orders placed to date</span>
+            </div>
+
+            {/* Pending Orders */}
+            <div
+              className="dashboard-stat-card"
+              onClick={() => navigate("/admin/orders")}
+              title="Click to review Pending Orders"
+            >
+              <div className="dashboard-stat-header">
+                <span className="dashboard-stat-title">Pending Orders</span>
+                <span className="dashboard-stat-icon">⏳</span>
+              </div>
+              <p className="dashboard-stat-value" style={{ color: "#e65100" }}>
+                {stats.pendingOrders}
+              </p>
+              <span className="dashboard-stat-desc">Awaiting confirmation</span>
+            </div>
+
+            {/* Customers */}
+            <div
+              className="dashboard-stat-card"
+              onClick={() => navigate("/admin/customers")}
+              title="Click to view Customers"
+            >
+              <div className="dashboard-stat-header">
+                <span className="dashboard-stat-title">Customers</span>
+                <span className="dashboard-stat-icon">👥</span>
+              </div>
+              <p className="dashboard-stat-value">{stats.totalCustomers}</p>
+              <span className="dashboard-stat-desc">Unique customer profiles</span>
+            </div>
+
+            {/* Inventory */}
+            <div
+              className="dashboard-stat-card"
               onClick={() => navigate("/admin/inventory")}
-              style={{ cursor: "pointer" }}
               title="Click to view Inventory"
             >
-              <h3>Inventory Items</h3>
-              <p>{stats.totalInventory}</p>
+              <div className="dashboard-stat-header">
+                <span className="dashboard-stat-title">Inventory Items</span>
+                <span className="dashboard-stat-icon">🌾</span>
+              </div>
+              <p className="dashboard-stat-value">{stats.totalInventory}</p>
+              <span className="dashboard-stat-desc">Baking ingredients tracked</span>
+            </div>
+
+            {/* Total Sales */}
+            <div
+              className="dashboard-stat-card"
+              onClick={() => navigate("/admin/orders")}
+              title="Click to view Sales & Orders"
+            >
+              <div className="dashboard-stat-header">
+                <span className="dashboard-stat-title">Gross Revenue</span>
+                <span className="dashboard-stat-icon">💰</span>
+              </div>
+              <p className="dashboard-stat-value" style={{ color: "#2e7d32", fontSize: "28px" }}>
+                ₹{stats.totalRevenue.toLocaleString("en-IN")}
+              </p>
+              <span className="dashboard-stat-desc">Net bakery sales</span>
             </div>
           </div>
 
-          <section className="admin-content">
-            <h2>Quick Actions</h2>
-
-            <div className="admin-actions">
-              <button onClick={() => navigate("/admin/products")}>
-                Manage Products
+          {/* Recent Orders Section */}
+          <section className="admin-section">
+            <div className="admin-section-header">
+              <h2>Recent Orders</h2>
+              <button
+                type="button"
+                className="admin-section-link"
+                onClick={() => navigate("/admin/orders")}
+              >
+                View All Orders →
               </button>
+            </div>
 
-              <button onClick={() => navigate("/admin/orders")}>
-                Manage Orders
-              </button>
+            {recentOrders.length === 0 ? (
+              <p style={{ color: "#8a6b58", margin: 0, fontSize: "14px" }}>
+                No orders received yet. New incoming orders will appear here automatically.
+              </p>
+            ) : (
+              <div className="dashboard-orders-table-wrapper">
+                <table className="dashboard-orders-table">
+                  <thead>
+                    <tr>
+                      <th>Order #</th>
+                      <th>Customer</th>
+                      <th>Contact</th>
+                      <th>Amount</th>
+                      <th>Status</th>
+                      <th>Placed At</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recentOrders.map((order) => {
+                      let tagClass = "dashboard-status-other";
+                      if (order.order_status === "Pending") tagClass = "dashboard-status-pending";
+                      if (order.order_status === "Preparing" || order.order_status === "Confirmed") tagClass = "dashboard-status-preparing";
+                      if (order.order_status === "Delivered") tagClass = "dashboard-status-delivered";
 
-              <button onClick={() => navigate("/admin/inventory")}>
-                Manage Inventory
-              </button>
+                      return (
+                        <tr
+                          key={order.id}
+                          style={{ cursor: "pointer" }}
+                          onClick={() => navigate("/admin/orders")}
+                          title="Click to open orders"
+                        >
+                          <td style={{ fontWeight: 700 }}>#{order.id}</td>
+                          <td>{order.customer_name || "Guest Customer"}</td>
+                          <td>{order.phone}</td>
+                          <td style={{ fontWeight: 700, color: "#2e7d32" }}>
+                            ₹{Number(order.total_amount || 0).toLocaleString("en-IN")}
+                          </td>
+                          <td>
+                            <span className={`dashboard-status-tag ${tagClass}`}>
+                              {order.order_status}
+                            </span>
+                          </td>
+                          <td style={{ color: "#8a6b58", fontSize: "12px" }}>
+                            {new Date(order.created_at).toLocaleDateString("en-IN", {
+                              month: "short",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+
+          {/* Quick Actions Hub */}
+          <section className="admin-section">
+            <div className="admin-section-header">
+              <h2>Quick Actions Hub</h2>
+            </div>
+
+            <div className="admin-actions-grid">
+              <div
+                className="admin-action-card"
+                onClick={() => navigate("/admin/products")}
+              >
+                <span className="admin-action-icon">🍰</span>
+                <h3>Manage Products</h3>
+                <p>Add, edit price, or toggle menu availability</p>
+              </div>
+
+              <div
+                className="admin-action-card"
+                onClick={() => navigate("/admin/categories")}
+              >
+                <span className="admin-action-icon">🏷️</span>
+                <h3>Manage Categories</h3>
+                <p>Classify breads, cakes, cookies & pastries</p>
+              </div>
+
+              <div
+                className="admin-action-card"
+                onClick={() => navigate("/admin/orders")}
+              >
+                <span className="admin-action-icon">📦</span>
+                <h3>Process Orders</h3>
+                <p>Review customer orders and update kitchen tickets</p>
+              </div>
+
+              <div
+                className="admin-action-card"
+                onClick={() => navigate("/admin/inventory")}
+              >
+                <span className="admin-action-icon">🌾</span>
+                <h3>Manage Inventory</h3>
+                <p>Track flour, sugar, butter & reorder alerts</p>
+              </div>
+
+              <div
+                className="admin-action-card"
+                onClick={() => navigate("/admin/customers")}
+              >
+                <span className="admin-action-icon">👥</span>
+                <h3>Customer Directory</h3>
+                <p>View repeat buyers and customer spend history</p>
+              </div>
+
+              <div
+                className="admin-action-card"
+                onClick={() => navigate("/")}
+              >
+                <span className="admin-action-icon">🌐</span>
+                <h3>Visit Storefront</h3>
+                <p>Preview the live website as customers see it</p>
+              </div>
             </div>
           </section>
         </main>
