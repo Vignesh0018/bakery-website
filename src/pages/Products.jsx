@@ -819,6 +819,30 @@ function Products() {
 
       {/* Main Products Catalog Section */}
       <section className="products-section">
+        {/* Section Catalog Title with Count Badge */}
+        <div className="products-catalog-header">
+          <div className="products-catalog-header-left">
+            <div className="products-catalog-title-wrap">
+              <h2>Bakery Catalog</h2>
+              <span className="products-count-badge">
+                {filteredProducts.length} {filteredProducts.length === 1 ? "Product" : "Products"}
+              </span>
+              {filteredProducts.length !== products.length && (
+                <span className="products-total-count-tag">
+                  of {products.length} total
+                </span>
+              )}
+            </div>
+            <p className="products-catalog-subtext">
+              {filteredProducts.length === 0
+                ? "No matching products found."
+                : `Showing ${filteredProducts.length} of ${products.length} total bakery products${
+                    selectedCategory !== "all" ? ` in "${selectedCategory}"` : ""
+                  }${statusFilter !== "all" ? ` (${statusFilter})` : ""}.`}
+            </p>
+          </div>
+        </div>
+
         {/* Controls Bar */}
         <div className="products-controls-bar">
           {/* Search box */}
@@ -849,10 +873,10 @@ function Products() {
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
             >
-              <option value="all">All Categories</option>
+              <option value="all">All Categories ({stats.total})</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.name}>
-                  {c.name}
+                  {c.name} ({categoryCounts[c.name] || 0})
                 </option>
               ))}
             </select>
