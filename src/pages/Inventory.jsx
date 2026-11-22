@@ -134,6 +134,12 @@ function Inventory() {
     setSaving(true);
 
     try {
+      if (!currentUser) {
+        throw new Error(
+          "Permission denied: Please ensure you are logged in as an administrator to add inventory."
+        );
+      }
+
       const trimmedName = form.item_name.trim();
       if (!trimmedName) {
         throw new Error("Please enter an item name.");
@@ -485,6 +491,23 @@ function Inventory() {
         </div>
       </div>
 
+      {/* Guest Mode Warning Banner */}
+      {!currentUser && !checkingAuth && (
+        <div className="inventory-banner inventory-banner-warning">
+          <span>
+            🔒 <strong>Guest Read-Only View:</strong> You are currently not signed in. An active admin session is required to add, edit, adjust, or delete inventory items.
+          </span>
+          <button
+            type="button"
+            className="inventory-btn inventory-btn-primary"
+            style={{ padding: "6px 14px", fontSize: "13px" }}
+            onClick={() => navigate("/admin/login")}
+          >
+            🔑 Log In to Admin
+          </button>
+        </div>
+      )}
+
       {/* Success Notification */}
       {success && (
         <div className="inventory-banner inventory-banner-success">
@@ -501,7 +524,19 @@ function Inventory() {
       {/* Error Notification */}
       {error && (
         <div className="inventory-banner inventory-banner-error">
-          <span>⚠️ {error}</span>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap", flex: 1 }}>
+            <span>⚠️ {error}</span>
+            {error.includes("Permission denied") && (
+              <button
+                type="button"
+                className="inventory-btn inventory-btn-secondary"
+                style={{ padding: "5px 12px", fontSize: "12px", background: "#ffffff" }}
+                onClick={() => navigate("/admin/login")}
+              >
+                🔑 Log In Here
+              </button>
+            )}
+          </div>
           <button
             className="inventory-banner-close"
             onClick={() => setError("")}
