@@ -358,6 +358,60 @@
   flex-wrap: wrap;
 }
 
+/* Catalog Header and Count Badges */
+.products-catalog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 22px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0e2d2;
+}
+
+.products-catalog-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.products-catalog-title-wrap h2 {
+  font-size: 22px;
+  margin: 0;
+  color: #432719;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+}
+
+.products-count-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  background: #432719;
+  color: #fff8ef;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.products-total-count-tag {
+  font-size: 13px;
+  font-weight: 600;
+  color: #8a6b58;
+  background: #f0e2d2;
+  padding: 3px 10px;
+  border-radius: 12px;
+}
+
+.products-catalog-subtext {
+  margin: 6px 0 0 0;
+  font-size: 13px;
+  color: #8a6b58;
+}
+
 /* Search and Controls Bar */
 .products-controls-bar {
   display: flex;
@@ -529,6 +583,25 @@
   justify-content: space-between;
   align-items: center;
   pointer-events: none;
+  gap: 8px;
+}
+
+.product-card-badges-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.product-index-badge {
+  background: rgba(0, 0, 0, 0.72);
+  color: #fff8ef;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 8px;
+  border-radius: 14px;
+  letter-spacing: 0.5px;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .product-category-badge {
@@ -583,9 +656,23 @@
 .product-card-title-row {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: flex-start;
   margin-bottom: 8px;
   gap: 10px;
+}
+
+.product-card-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.product-item-number {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #8b5e3c;
+  letter-spacing: 0.5px;
 }
 
 .product-card-title {
