@@ -163,6 +163,9 @@ function AdminDashboard() {
               Refresh Dashboard
             </button>
           </div>
+        <button onClick={() => navigate("/")}>
+  Back to Website
+</button>  
 
           <div className="admin-stats">
             <div className="stat-card">
