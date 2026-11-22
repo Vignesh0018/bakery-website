@@ -470,6 +470,17 @@ function Products() {
     };
   }, [products]);
 
+  // Product count per category
+  const categoryCounts = useMemo(() => {
+    const counts = {};
+    products.forEach((p) => {
+      if (p.category) {
+        counts[p.category] = (counts[p.category] || 0) + 1;
+      }
+    });
+    return counts;
+  }, [products]);
+
   // Filtered and sorted products
   const filteredProducts = useMemo(() => {
     let list = [...products];
@@ -719,12 +730,14 @@ function Products() {
                   </option>
                   {categories.map((c) => (
                     <option key={c.id} value={c.name}>
-                      {c.name}
+                      {c.name} ({categoryCounts[c.name] || 0} items)
                     </option>
                   ))}
                   {form.category &&
                     !categories.some((c) => c.name === form.category) && (
-                      <option value={form.category}>{form.category} (Current)</option>
+                      <option value={form.category}>
+                        {form.category} ({categoryCounts[form.category] || 0} items)
+                      </option>
                     )}
                 </select>
                 <span className="products-field-hint">
