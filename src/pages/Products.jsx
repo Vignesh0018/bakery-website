@@ -983,7 +983,7 @@ function Products() {
           </div>
         ) : (
           <div className="products-grid">
-            {filteredProducts.map((product) => {
+            {filteredProducts.map((product, index) => {
               const isUpdating = updatingAvailability === product.id;
               const isAvail = product.is_available !== false;
 
@@ -1012,9 +1012,12 @@ function Products() {
 
                     {/* Floating Badges */}
                     <div className="product-card-badges">
-                      <span className="product-category-badge">
-                        {product.category || "Bakery"}
-                      </span>
+                      <div className="product-card-badges-left">
+                        <span className="product-index-badge">#{index + 1}</span>
+                        <span className="product-category-badge">
+                          {product.category || "Bakery"}
+                        </span>
+                      </div>
                       <span
                         className={`product-status-badge ${
                           isAvail ? "available" : "unavailable"
@@ -1029,7 +1032,10 @@ function Products() {
                   {/* Body */}
                   <div className="product-card-body">
                     <div className="product-card-title-row">
-                      <h3 className="product-card-title">{product.name}</h3>
+                      <div className="product-card-title-group">
+                        <span className="product-item-number">Item #{index + 1}</span>
+                        <h3 className="product-card-title">{product.name}</h3>
+                      </div>
                       <span className="product-card-price">
                         ₹{Number(product.price).toLocaleString("en-IN")}
                       </span>
