@@ -201,3 +201,54 @@
     width: 100%;
   }
 }
+/* Admin navigation buttons */
+.admin-panel button,
+.admin-sidebar button,
+.dashboard-sidebar button,
+.sidebar button {
+  width: 100%;
+  padding: 14px 18px;
+  margin-bottom: 14px;
+
+  background: #432719;
+  color: #fff8ef;
+
+  border: 1px solid #6b422c;
+  border-radius: 10px;
+
+  font-size: 18px;
+  font-weight: 500;
+  cursor: pointer;
+
+  transition: all 0.3s ease;
+}
+
+/* Hover effect */
+.admin-panel button:hover,
+.admin-sidebar button:hover,
+.dashboard-sidebar button:hover,
+.sidebar button:hover {
+  background: #8b5e3c;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 12px rgba(67, 39, 25, 0.2);
+}
+
+/* Click effect */
+.admin-panel button:active,
+.admin-sidebar button:active,
+.dashboard-sidebar button:active,
+.sidebar button:active {
+  transform: scale(0.98);
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .admin-panel button,
+  .admin-sidebar button,
+  .dashboard-sidebar button,
+  .sidebar button {
+    padding: 12px;
+    font-size: 16px;
+  }
+}
