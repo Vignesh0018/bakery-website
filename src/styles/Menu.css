@@ -73,6 +73,20 @@
   box-shadow: 0 4px 14px rgba(67, 39, 25, 0.2);
 }
 
+/* Product Count Indicator */
+.menu-count-badge {
+  display: inline-block;
+  padding: 6px 18px;
+  background: #fdf5ec;
+  color: #8b5e3c;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 35px;
+  border: 1px solid #dfcbbb;
+  box-shadow: 0 2px 6px rgba(67, 39, 25, 0.04);
+}
+
 /* Product Grid */
 .product-grid {
   display: grid;

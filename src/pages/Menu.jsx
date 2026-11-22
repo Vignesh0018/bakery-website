@@ -55,6 +55,14 @@ function Menu() {
     ),
   ];
 
+  // Category counts
+  const categoryCounts = products.reduce((acc, p) => {
+    if (p.category) {
+      acc[p.category] = (acc[p.category] || 0) + 1;
+    }
+    return acc;
+  }, {});
+
   // Filter products
   const filteredProducts =
     selectedCategory === "All"
@@ -82,18 +90,31 @@ function Menu() {
         Discover our artisanal sourdough breads, handcrafted celebration cakes, and delicate European pastries baked fresh daily.
       </p>
 
-      {/* Category filters */}
+      {/* Category filters with product counts */}
       <div className="category-filters">
-        {categories.map((category) => (
-          <button
-            key={category}
-            className={selectedCategory === category ? "active" : ""}
-            onClick={() => setSelectedCategory(category)}
-          >
-            {category}
-          </button>
-        ))}
+        {categories.map((category) => {
+          const count =
+            category === "All" ? products.length : categoryCounts[category] || 0;
+          return (
+            <button
+              key={category}
+              className={selectedCategory === category ? "active" : ""}
+              onClick={() => setSelectedCategory(category)}
+            >
+              {category} ({count})
+            </button>
+          );
+        })}
       </div>
+
+      {/* Product Count Indicator */}
+      {!loading && !error && products.length > 0 && (
+        <div className="menu-count-badge">
+          Showing {filteredProducts.length}{" "}
+          {filteredProducts.length === 1 ? "fresh creation" : "fresh creations"}
+          {selectedCategory !== "All" && ` in ${selectedCategory}`}
+        </div>
+      )}
 
       {/* Products Grid */}
       <div className="product-grid">
