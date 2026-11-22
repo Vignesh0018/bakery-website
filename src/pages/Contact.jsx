@@ -1,46 +1,56 @@
-
-import React from "react";
 import "../styles/Contact.css";
 
 function Contact() {
   return (
     <section className="contact-section" id="contact-us">
-
       <div className="contact-heading">
         <p>GET IN TOUCH</p>
         <h2>We'd Love to See You</h2>
-        <span>Visit us or get in touch for your next treat.</span>
+        <span>Visit our bakehouse or get in touch for custom cakes and fresh treats.</span>
       </div>
 
       <div className="contact-container">
-
         <div className="contact-details">
-
           <div className="contact-item">
-            <h3>Our Location</h3>
-            <p>123 Main Road, Your Town, Tamil Nadu</p>
+            <div className="contact-item-title-row">
+              <span className="contact-item-icon">📍</span>
+              <h3>Our Bakehouse Location</h3>
+            </div>
+            <p>123 Main Road, Thiruthani, Tamil Nadu, India</p>
           </div>
 
           <div className="contact-item">
-            <h3>Call Us</h3>
-            <p>+91 98765 43210</p>
-            <a href="tel:+919876543210">Call Now</a>
+            <div className="contact-item-title-row">
+              <span className="contact-item-icon">📞</span>
+              <h3>Call the Bakery</h3>
+            </div>
+            <p>Have an inquiry or urgent request?</p>
+            <a href="tel:+919876543210" className="contact-phone-btn">
+              +91 98765 43210
+            </a>
           </div>
 
           <div className="contact-item">
-            <h3>Opening Hours</h3>
-            <p>Monday – Sunday</p>
-            <p>9:00 AM – 10:00 PM</p>
+            <div className="contact-item-title-row">
+              <span className="contact-item-icon">⏰</span>
+              <h3>Opening Hours</h3>
+            </div>
+            <p>Monday – Saturday: 10:00 AM – 9:00 PM</p>
+            <p>Sunday: 9:00 AM – 9:00 PM</p>
           </div>
 
           <div className="contact-item">
-            <h3>Follow Us</h3>
+            <div className="contact-item-title-row">
+              <span className="contact-item-icon">📸</span>
+              <h3>Follow Our Bakes</h3>
+            </div>
             <a
               href="https://www.instagram.com/"
               target="_blank"
               rel="noreferrer"
+              className="contact-phone-btn"
             >
-              Instagram
+              Instagram @thegoldencrust
             </a>
           </div>
 
@@ -50,9 +60,8 @@ function Contact() {
             target="_blank"
             rel="noreferrer"
           >
-            Contact Us on WhatsApp
+            <span>💬 Chat With Us on WhatsApp</span>
           </a>
-
         </div>
 
         <div className="map-container">
@@ -64,9 +73,7 @@ function Contact() {
             allowFullScreen
           ></iframe>
         </div>
-
       </div>
-
     </section>
   );
 }
