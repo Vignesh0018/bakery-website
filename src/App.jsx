@@ -41,6 +41,7 @@ function App() {
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/products" element={<Products />} />
         <Route path="/admin/orders" element={<Orders />} />
+        <Route path="/admin/categories" element={<Categories />} />
       </Routes>
     </BrowserRouter>
   );
