@@ -1,8 +1,12 @@
+
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import "../styles/Orders.css";
 
 function Orders() {
+  const navigate = useNavigate();
+
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -73,9 +77,15 @@ function Orders() {
           <p>View and manage customer orders.</p>
         </div>
 
-        <button onClick={fetchOrders}>
-          Refresh Orders
-        </button>
+        <div className="orders-header-buttons">
+          <button onClick={() => navigate("/admin/dashboard")}>
+            ← Back to Dashboard
+          </button>
+
+          <button onClick={fetchOrders}>
+            Refresh Orders
+          </button>
+        </div>
       </div>
 
       {/* Error */}
@@ -97,11 +107,8 @@ function Orders() {
         </div>
       ) : (
 
-        /* Orders */
         <div className="orders-list">
-
           {orders.map((order) => {
-
             const items = Array.isArray(order.items)
               ? order.items
               : [];
@@ -109,7 +116,6 @@ function Orders() {
             return (
               <div className="order-card" key={order.id}>
 
-                {/* Order Header */}
                 <div className="order-card-header">
                   <h3>Order #{order.id}</h3>
 
@@ -129,9 +135,7 @@ function Orders() {
                   </select>
                 </div>
 
-                {/* Customer Details */}
                 <div className="order-details">
-
                   <div>
                     <p>
                       <strong>Customer:</strong>{" "}
@@ -139,8 +143,7 @@ function Orders() {
                     </p>
 
                     <p>
-                      <strong>Phone:</strong>{" "}
-                      {order.phone}
+                      <strong>Phone:</strong> {order.phone}
                     </p>
 
                     <p>
@@ -156,8 +159,7 @@ function Orders() {
                     </p>
 
                     <p>
-                      <strong>Payment:</strong>{" "}
-                      {order.payment_method}
+                      <strong>Payment:</strong> {order.payment_method}
                     </p>
 
                     <p>
@@ -165,12 +167,9 @@ function Orders() {
                       ₹{Number(order.total_amount || 0).toLocaleString("en-IN")}
                     </p>
                   </div>
-
                 </div>
 
-                {/* Ordered Items */}
                 <div className="order-items">
-
                   <h4>Ordered Items</h4>
 
                   {items.length === 0 ? (
@@ -178,10 +177,7 @@ function Orders() {
                   ) : (
                     items.map((item, index) => (
                       <div className="order-item" key={index}>
-
-                        <h5>
-                          {item.product || "Custom Cake"}
-                        </h5>
+                        <h5>{item.product || "Custom Cake"}</h5>
 
                         <p>
                           <strong>Flavour:</strong>{" "}
@@ -212,20 +208,16 @@ function Orders() {
                           <strong>Order Type:</strong>{" "}
                           {item.delivery_type || "Not specified"}
                         </p>
-
                       </div>
                     ))
                   )}
-
                 </div>
 
-                {/* Notes */}
                 <div className="order-notes">
                   <strong>Notes:</strong>{" "}
                   {order.notes || "None"}
                 </div>
 
-                {/* Delete */}
                 <div className="order-actions">
                   <button
                     className="delete-order-btn"
@@ -238,10 +230,8 @@ function Orders() {
               </div>
             );
           })}
-
         </div>
       )}
-
     </div>
   );
 }
