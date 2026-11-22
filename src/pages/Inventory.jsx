@@ -37,6 +37,8 @@ function Inventory() {
   const [saving, setSaving] = useState(false);
   const [seeding, setSeeding] = useState(false);
   const [adjustingId, setAdjustingId] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -83,14 +85,18 @@ function Inventory() {
 
     const loadData = async () => {
       try {
-        const { data, error: fetchErr } = await supabase
-          .from("inventory")
-          .select("*")
-          .order("item_name", { ascending: true });
+        const [invRes, authRes] = await Promise.all([
+          supabase
+            .from("inventory")
+            .select("*")
+            .order("item_name", { ascending: true }),
+          supabase.auth.getUser(),
+        ]);
 
         if (!ignore) {
-          if (fetchErr) throw fetchErr;
-          setInventory(data || []);
+          if (invRes.error) throw invRes.error;
+          setInventory(invRes.data || []);
+          setCurrentUser(authRes?.data?.user || null);
         }
       } catch (err) {
         if (!ignore) {
@@ -99,6 +105,7 @@ function Inventory() {
       } finally {
         if (!ignore) {
           setLoading(false);
+          setCheckingAuth(false);
         }
       }
     };
