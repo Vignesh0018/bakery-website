@@ -1,8 +1,46 @@
-
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import "../styles/Products.css";
+
+// Bakery starters to populate if empty
+const BAKERY_SAMPLE_PRODUCTS = [
+  {
+    name: "Classic Chocolate Fudge Cake",
+    description: "Rich, multi-layered Belgian chocolate cake with velvety dark chocolate ganache frosting.",
+    price: 650,
+    category: "CAKES",
+    is_available: true,
+  },
+  {
+    name: "French Butter Croissant",
+    description: "Flaky, golden-brown all-butter layered croissant baked fresh daily with Normandy butter.",
+    price: 95,
+    category: "PASTRIES",
+    is_available: true,
+  },
+  {
+    name: "Blueberry Glazed Danish",
+    description: "Crispy puff pastry filled with creamy vanilla custard and organic wild blueberry compote.",
+    price: 130,
+    category: "PASTRIES",
+    is_available: true,
+  },
+  {
+    name: "Rustic Sourdough Boule",
+    description: "Naturally fermented 36-hour sourdough loaf with a thick crunchy crust and airy crumb.",
+    price: 180,
+    category: "BREADS",
+    is_available: true,
+  },
+  {
+    name: "Triple Chocolate Chunk Cookies",
+    description: "Soft-baked gourmet cookies loaded with dark, milk, and white chocolate chunks.",
+    price: 120,
+    category: "COOKIES",
+    is_available: true,
+  },
+];
 
 function Products() {
   const navigate = useNavigate();
@@ -12,11 +50,22 @@ function Products() {
   const [loading, setLoading] = useState(true);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [seeding, setSeeding] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [updatingAvailability, setUpdatingAvailability] = useState(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+
   const [error, setError] = useState("");
-  const [categoryError, setCategoryError] = useState("");
   const [success, setSuccess] = useState("");
+
+  // Search & Filter state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all"); // 'all' | 'available' | 'unavailable'
+  const [sortBy, setSortBy] = useState("newest");
+
+  // Local image preview URL
+  const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
 
   const emptyForm = {
     name: "",
@@ -31,43 +80,74 @@ function Products() {
   // Fetch products
   const fetchProducts = async () => {
     setLoading(true);
-
-    const { data, error } = await supabase
+    const { data, error: prodErr } = await supabase
       .from("products")
       .select("*")
       .order("created_at", { ascending: false });
 
-    if (error) {
-      setError(error.message);
+    if (prodErr) {
+      setError(prodErr.message);
     } else {
       setProducts(data || []);
     }
-
     setLoading(false);
   };
 
-  // Fetch categories from Supabase
+  // Fetch categories
   const fetchCategories = async () => {
     setCategoriesLoading(true);
-    setCategoryError("");
-
-    const { data, error } = await supabase
+    const { data, error: catErr } = await supabase
       .from("categories")
       .select("*")
       .order("name", { ascending: true });
 
-    if (error) {
-      setCategoryError(error.message);
+    if (catErr) {
+      console.error("Categories error:", catErr.message);
     } else {
       setCategories(data || []);
     }
-
     setCategoriesLoading(false);
   };
 
+  // Initial load
   useEffect(() => {
-    fetchProducts();
-    fetchCategories();
+    let ignore = false;
+
+    const loadAll = async () => {
+      try {
+        const [prodRes, catRes] = await Promise.all([
+          supabase
+            .from("products")
+            .select("*")
+            .order("created_at", { ascending: false }),
+          supabase
+            .from("categories")
+            .select("*")
+            .order("name", { ascending: true }),
+        ]);
+
+        if (!ignore) {
+          if (prodRes.error) setError(prodRes.error.message);
+          else setProducts(prodRes.data || []);
+
+          if (catRes.error) console.error("Categories load failed:", catRes.error.message);
+          else setCategories(catRes.data || []);
+        }
+      } catch (err) {
+        if (!ignore) setError(err.message || "Failed to load products.");
+      } finally {
+        if (!ignore) {
+          setLoading(false);
+          setCategoriesLoading(false);
+        }
+      }
+    };
+
+    loadAll();
+
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   const handleChange = (e) => {
@@ -77,40 +157,49 @@ function Products() {
     });
   };
 
+  // Handle image file selection with preview
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0] || null;
+    setForm((prev) => ({ ...prev, image: file }));
+
+    if (file) {
+      const preview = URL.createObjectURL(file);
+      setImagePreviewUrl(preview);
+    } else {
+      setImagePreviewUrl(null);
+    }
+  };
+
+  const clearSelectedImage = () => {
+    setForm((prev) => ({ ...prev, image: null }));
+    if (imagePreviewUrl) {
+      URL.revokeObjectURL(imagePreviewUrl);
+      setImagePreviewUrl(null);
+    }
+  };
+
   const getStoragePath = (imageUrl) => {
     const marker = "/product-images/";
-
     if (!imageUrl || !imageUrl.includes(marker)) {
       return null;
     }
-
-    return decodeURIComponent(
-      imageUrl.split(marker)[1].split("?")[0]
-    );
+    return decodeURIComponent(imageUrl.split(marker)[1].split("?")[0]);
   };
 
   // Add or update product
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     setError("");
     setSuccess("");
     setSaving(true);
 
     try {
       let imageUrl = null;
-
-      const existingProduct = products.find(
-        (product) => product.id === editingId
-      );
+      const existingProduct = products.find((p) => p.id === editingId);
 
       if (form.image) {
         const fileExt = form.image.name.split(".").pop();
-
-        const fileName = `${Date.now()}-${Math.random()
-          .toString(36)
-          .slice(2)}.${fileExt}`;
-
+        const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
         const filePath = `products/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
@@ -130,14 +219,13 @@ function Products() {
 
       const productData = {
         name: form.name.trim(),
-        description: form.description.trim(),
+        description: form.description ? form.description.trim() : "",
         price: Number(form.price),
         category: form.category,
         image_url: imageUrl,
       };
 
       let result;
-
       if (editingId) {
         result = await supabase
           .from("products")
@@ -151,35 +239,31 @@ function Products() {
 
       if (result.error) throw result.error;
 
-      // Remove old image after successful replacement
+      // Remove old image if replaced
       if (form.image && existingProduct?.image_url) {
-        const oldPath = getStoragePath(
-          existingProduct.image_url
-        );
-
+        const oldPath = getStoragePath(existingProduct.image_url);
         if (oldPath) {
-          const { error: removeError } = await supabase.storage
-            .from("product-images")
-            .remove([oldPath]);
-
-          if (removeError) {
-            console.error("Old image cleanup failed:", removeError);
-          }
+          await supabase.storage.from("product-images").remove([oldPath]);
         }
       }
 
       setSuccess(
-        editingId
-          ? "Product updated successfully!"
-          : "Product added successfully!"
+        editingId ? "Product updated successfully!" : "Product added successfully!"
       );
 
+      clearSelectedImage();
       setForm(emptyForm);
       setEditingId(null);
-
+      setIsFormOpen(false);
       await fetchProducts();
     } catch (err) {
-      setError(err.message || "Something went wrong.");
+      if (err.code === "42501" || err.message?.includes("security policy")) {
+        setError(
+          "Permission denied: Please ensure you are logged in as an administrator to save products."
+        );
+      } else {
+        setError(err.message || "Something went wrong.");
+      }
     } finally {
       setSaving(false);
     }
@@ -188,34 +272,32 @@ function Products() {
   // Toggle product availability
   const handleToggleAvailability = async (product) => {
     setError("");
-    setSuccess("");
+    const newAvailability = product.is_available === false ? true : false;
     setUpdatingAvailability(product.id);
 
     try {
-      const newAvailability = !product.is_available;
-
-      const { error } = await supabase
+      const { error: updateErr } = await supabase
         .from("products")
         .update({ is_available: newAvailability })
         .eq("id", product.id);
 
-      if (error) throw error;
+      if (updateErr) throw updateErr;
 
-      setProducts((prevProducts) =>
-        prevProducts.map((item) =>
-          item.id === product.id
-            ? { ...item, is_available: newAvailability }
-            : item
+      setProducts((prev) =>
+        prev.map((item) =>
+          item.id === product.id ? { ...item, is_available: newAvailability } : item
         )
       );
 
       setSuccess(
-        `${product.name} is now ${
-          newAvailability ? "Available" : "Unavailable"
-        }.`
+        `"${product.name}" is now ${newAvailability ? "Available" : "Unavailable"}.`
       );
     } catch (err) {
-      setError(err.message || "Unable to update availability.");
+      if (err.code === "42501" || err.message?.includes("security policy")) {
+        setError("Permission denied: Admin login required to change availability.");
+      } else {
+        setError(err.message || "Unable to update availability.");
+      }
     } finally {
       setUpdatingAvailability(null);
     }
@@ -230,8 +312,9 @@ function Products() {
       category: product.category,
       image: null,
     });
-
+    setImagePreviewUrl(product.image_url || null);
     setEditingId(product.id);
+    setIsFormOpen(true);
     setError("");
     setSuccess("");
 
@@ -243,10 +326,7 @@ function Products() {
 
   // Delete product image
   const handleDeleteImage = async (product) => {
-    const confirmed = window.confirm(
-      `Delete the image for ${product.name}?`
-    );
-
+    const confirmed = window.confirm(`Delete the image for "${product.name}"?`);
     if (!confirmed) return;
 
     setError("");
@@ -254,283 +334,721 @@ function Products() {
 
     try {
       const imagePath = getStoragePath(product.image_url);
-
       if (imagePath) {
-        const { error: storageError } = await supabase.storage
-          .from("product-images")
-          .remove([imagePath]);
-
-        if (storageError) throw storageError;
+        await supabase.storage.from("product-images").remove([imagePath]);
       }
 
-      const { error: databaseError } = await supabase
+      const { error: dbError } = await supabase
         .from("products")
         .update({ image_url: null })
         .eq("id", product.id);
 
-      if (databaseError) throw databaseError;
+      if (dbError) throw dbError;
 
-      setSuccess("Product image deleted successfully!");
+      setProducts((prev) =>
+        prev.map((item) =>
+          item.id === product.id ? { ...item, image_url: null } : item
+        )
+      );
 
-      await fetchProducts();
+      if (editingId === product.id) {
+        clearSelectedImage();
+      }
+
+      setSuccess("Product image removed successfully!");
     } catch (err) {
       setError(err.message || "Unable to delete image.");
     }
   };
 
-  // Delete product
+  // Delete entire product
   const handleDelete = async (id) => {
+    const product = products.find((p) => p.id === id);
     const confirmed = window.confirm(
-      "Are you sure you want to delete this product?"
+      `Are you sure you want to delete "${product?.name || "this product"}"?`
     );
-
     if (!confirmed) return;
 
     setError("");
     setSuccess("");
 
-    const product = products.find(
-      (item) => item.id === id
-    );
-
     try {
-      const { error } = await supabase
+      const { error: delErr } = await supabase
         .from("products")
         .delete()
         .eq("id", id);
 
-      if (error) throw error;
+      if (delErr) throw delErr;
 
-      // Remove associated image from Storage
       if (product?.image_url) {
-        const imagePath = getStoragePath(
-          product.image_url
-        );
-
+        const imagePath = getStoragePath(product.image_url);
         if (imagePath) {
-          const { error: storageError } = await supabase.storage
-            .from("product-images")
-            .remove([imagePath]);
-
-          if (storageError) {
-            console.error("Image cleanup failed:", storageError);
-          }
+          await supabase.storage.from("product-images").remove([imagePath]);
         }
       }
 
       setSuccess("Product deleted successfully!");
-
+      if (editingId === id) {
+        cancelEdit();
+      }
       await fetchProducts();
     } catch (err) {
-      setError(err.message || "Unable to delete product.");
+      if (err.code === "42501" || err.message?.includes("security policy")) {
+        setError("Permission denied: Admin login required to delete products.");
+      } else {
+        setError(err.message || "Unable to delete product.");
+      }
     }
   };
 
-  // Cancel editing
+  // Cancel edit
   const cancelEdit = () => {
+    clearSelectedImage();
     setForm(emptyForm);
     setEditingId(null);
+    setIsFormOpen(false);
     setError("");
     setSuccess("");
   };
 
+  // Seed sample products
+  const handleSeedProducts = async () => {
+    const confirmed = window.confirm(
+      "Load standard bakery menu items (Cakes, Pastries, Breads, Cookies) into products?"
+    );
+    if (!confirmed) return;
+
+    setSeeding(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      const { error: seedErr } = await supabase
+        .from("products")
+        .insert(BAKERY_SAMPLE_PRODUCTS);
+
+      if (seedErr) throw seedErr;
+
+      setSuccess("Sample bakery products loaded successfully!");
+      await fetchProducts();
+    } catch (err) {
+      if (err.code === "42501" || err.message?.includes("security policy")) {
+        setError("Permission denied: Admin login required to seed products.");
+      } else {
+        setError(err.message || "Failed to load sample products.");
+      }
+    } finally {
+      setSeeding(false);
+    }
+  };
+
+  // Stats computation
+  const stats = useMemo(() => {
+    let availableCount = 0;
+    let unavailableCount = 0;
+    const catSet = new Set();
+
+    products.forEach((p) => {
+      if (p.is_available === false) {
+        unavailableCount += 1;
+      } else {
+        availableCount += 1;
+      }
+      if (p.category) catSet.add(p.category);
+    });
+
+    return {
+      total: products.length,
+      available: availableCount,
+      unavailable: unavailableCount,
+      categoriesCount: catSet.size,
+    };
+  }, [products]);
+
+  // Filtered and sorted products
+  const filteredProducts = useMemo(() => {
+    let list = [...products];
+
+    // Search query
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      list = list.filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          (p.description && p.description.toLowerCase().includes(q)) ||
+          (p.category && p.category.toLowerCase().includes(q))
+      );
+    }
+
+    // Category filter
+    if (selectedCategory !== "all") {
+      list = list.filter((p) => p.category === selectedCategory);
+    }
+
+    // Status filter
+    if (statusFilter === "available") {
+      list = list.filter((p) => p.is_available !== false);
+    } else if (statusFilter === "unavailable") {
+      list = list.filter((p) => p.is_available === false);
+    }
+
+    // Sorting
+    list.sort((a, b) => {
+      if (sortBy === "name_asc") {
+        return a.name.localeCompare(b.name);
+      }
+      if (sortBy === "name_desc") {
+        return b.name.localeCompare(a.name);
+      }
+      if (sortBy === "price_asc") {
+        return Number(a.price) - Number(b.price);
+      }
+      if (sortBy === "price_desc") {
+        return Number(b.price) - Number(a.price);
+      }
+      if (sortBy === "newest") {
+        return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+      }
+      return 0;
+    });
+
+    return list;
+  }, [products, searchQuery, selectedCategory, statusFilter, sortBy]);
+
   return (
     <div className="products-page">
-
       {/* Header */}
       <div className="products-header">
-        <div>
+        <div className="products-header-left">
           <h1>Product Management</h1>
-          <p>Manage your bakery products here.</p>
+          <p>Create, price, and curate fresh bakery items for your online storefront.</p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => navigate("/admin/dashboard")}
-        >
-          ← Back to Dashboard
-        </button>
-      </div>
-
-      {/* Add / Edit Product */}
-      <section>
-        <h2>{editingId ? "Edit Product" : "Add New Product"}</h2>
-
-        <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            name="name"
-            placeholder="Product Name"
-            value={form.name}
-            onChange={handleChange}
-            required
-          />
-
-          <textarea
-            name="description"
-            placeholder="Product Description"
-            value={form.description}
-            onChange={handleChange}
-          />
-
-          <input
-            type="number"
-            name="price"
-            placeholder="Product Price"
-            min="0.01"
-            step="0.01"
-            value={form.price}
-            onChange={handleChange}
-            required
-          />
-
-          {/* Dynamic Category Dropdown */}
-          <select
-            name="category"
-            value={form.category}
-            onChange={handleChange}
-            required
-            disabled={categoriesLoading}
+        <div className="products-header-actions">
+          <button
+            type="button"
+            className="products-btn products-btn-secondary"
+            onClick={() => navigate("/admin/dashboard")}
           >
-            <option value="">
-              {categoriesLoading
-                ? "Loading categories..."
-                : "Select Category"}
-            </option>
-
-            {categories.map((category) => (
-              <option
-                key={category.id}
-                value={category.name}
-              >
-                {category.name}
-              </option>
-            ))}
-
-            {/* Preserve existing category when editing */}
-            {form.category &&
-              !categories.some(
-                (category) => category.name === form.category
-              ) && (
-                <option value={form.category}>
-                  {form.category} (Existing)
-                </option>
-              )}
-          </select>
-
-          {categoryError && (
-            <p style={{ color: "red" }}>
-              Unable to load categories: {categoryError}
-            </p>
-          )}
-
-          <label>Product Image</label>
-
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) =>
-              setForm({
-                ...form,
-                image: e.target.files[0] || null,
-              })
-            }
-          />
-
-          <button type="submit" disabled={saving}>
-            {saving
-              ? "Saving..."
-              : editingId
-                ? "Update Product"
-                : "Add Product"}
+            ← Back to Dashboard
           </button>
 
-          {editingId && (
-            <button type="button" onClick={cancelEdit}>
+          <button
+            type="button"
+            className="products-btn products-btn-secondary"
+            onClick={fetchProducts}
+            disabled={loading}
+          >
+            🔄 {loading ? "Refreshing..." : "Refresh"}
+          </button>
+
+          <button
+            type="button"
+            className="products-btn products-btn-primary"
+            onClick={() => {
+              if (isFormOpen && !editingId) {
+                cancelEdit();
+              } else {
+                setForm(emptyForm);
+                setEditingId(null);
+                setImagePreviewUrl(null);
+                setIsFormOpen(true);
+              }
+            }}
+          >
+            {isFormOpen && !editingId ? "✕ Close Form" : "+ Add New Product"}
+          </button>
+        </div>
+      </div>
+
+      {/* Success Notification */}
+      {success && (
+        <div className="products-banner products-banner-success">
+          <span>✓ {success}</span>
+          <button
+            className="products-banner-close"
+            onClick={() => setSuccess("")}
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* Error Notification */}
+      {error && (
+        <div className="products-banner products-banner-error">
+          <span>⚠️ {error}</span>
+          <button
+            className="products-banner-close"
+            onClick={() => setError("")}
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* Metrics / Stats Cards */}
+      <div className="products-stats-grid">
+        <div
+          className={`products-stat-card ${statusFilter === "all" && selectedCategory === "all" ? "active-filter" : ""}`}
+          onClick={() => {
+            setStatusFilter("all");
+            setSelectedCategory("all");
+          }}
+        >
+          <div className="products-stat-header">
+            <span className="products-stat-title">Total Products</span>
+            <span className="products-stat-icon">🍰</span>
+          </div>
+          <p className="products-stat-value">{stats.total}</p>
+          <span className="products-stat-desc">All products on menu</span>
+        </div>
+
+        <div
+          className={`products-stat-card ${statusFilter === "available" ? "active-filter" : ""}`}
+          onClick={() => setStatusFilter("available")}
+        >
+          <div className="products-stat-header">
+            <span className="products-stat-title">Available</span>
+            <span className="products-stat-icon">🟢</span>
+          </div>
+          <p className="products-stat-value" style={{ color: "#2e7d32" }}>
+            {stats.available}
+          </p>
+          <span className="products-stat-desc">Ready for customer orders</span>
+        </div>
+
+        <div
+          className={`products-stat-card ${statusFilter === "unavailable" ? "active-filter" : ""}`}
+          onClick={() => setStatusFilter("unavailable")}
+        >
+          <div className="products-stat-header">
+            <span className="products-stat-title">Unavailable</span>
+            <span className="products-stat-icon">🔴</span>
+          </div>
+          <p className="products-stat-value" style={{ color: "#c62828" }}>
+            {stats.unavailable}
+          </p>
+          <span className="products-stat-desc">Hidden from online menu</span>
+        </div>
+
+        <div
+          className="products-stat-card"
+          onClick={() => navigate("/admin/categories")}
+          title="Click to manage categories"
+        >
+          <div className="products-stat-header">
+            <span className="products-stat-title">Categories</span>
+            <span className="products-stat-icon">🏷️</span>
+          </div>
+          <p className="products-stat-value">{stats.categoriesCount}</p>
+          <span className="products-stat-desc">Active bakery classifications</span>
+        </div>
+      </div>
+
+      {/* Add / Edit Product Collapsible Section */}
+      {isFormOpen && (
+        <section className="products-section">
+          <div className="products-section-header">
+            <h2>{editingId ? "Edit Bakery Product" : "Add New Bakery Product"}</h2>
+            <button
+              type="button"
+              className="products-btn products-btn-secondary"
+              onClick={cancelEdit}
+            >
               Cancel
             </button>
-          )}
-        </form>
+          </div>
 
-        {error && <p style={{ color: "red" }}>{error}</p>}
-        {success && <p style={{ color: "green" }}>{success}</p>}
-      </section>
+          <form onSubmit={handleSubmit} className="products-form">
+            <div className="products-form-grid">
+              {/* Product Name */}
+              <div className="products-field">
+                <label htmlFor="prod-name">
+                  Product Name <span className="required">*</span>
+                </label>
+                <input
+                  id="prod-name"
+                  type="text"
+                  name="name"
+                  placeholder="e.g. Sourdough Boule, Strawberry Tart"
+                  value={form.name}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
 
-      {/* All Products */}
-      <section>
-        <h2>All Products ({products.length})</h2>
+              {/* Price */}
+              <div className="products-field">
+                <label htmlFor="prod-price">
+                  Price (₹) <span className="required">*</span>
+                </label>
+                <input
+                  id="prod-price"
+                  type="number"
+                  name="price"
+                  placeholder="e.g. 250"
+                  min="0.01"
+                  step="0.01"
+                  value={form.price}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
 
+              {/* Category */}
+              <div className="products-field">
+                <label htmlFor="prod-cat">
+                  Category <span className="required">*</span>
+                </label>
+                <select
+                  id="prod-cat"
+                  name="category"
+                  value={form.category}
+                  onChange={handleChange}
+                  required
+                  disabled={categoriesLoading}
+                >
+                  <option value="">
+                    {categoriesLoading ? "Loading categories..." : "Select Category"}
+                  </option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.name}>
+                      {c.name}
+                    </option>
+                  ))}
+                  {form.category &&
+                    !categories.some((c) => c.name === form.category) && (
+                      <option value={form.category}>{form.category} (Current)</option>
+                    )}
+                </select>
+                <span className="products-field-hint">
+                  Need a new category? Manage them under Categories in Admin.
+                </span>
+              </div>
+
+              {/* Description */}
+              <div className="products-field products-field-full">
+                <label htmlFor="prod-desc">Product Description</label>
+                <textarea
+                  id="prod-desc"
+                  name="description"
+                  placeholder="Taste profile, ingredients, allergy warnings, or dietary notes..."
+                  value={form.description}
+                  onChange={handleChange}
+                />
+              </div>
+
+              {/* Product Image & Preview */}
+              <div className="products-field products-field-full">
+                <label>Product Image</label>
+                <div className="products-image-upload-wrapper">
+                  <div className="products-image-picker">
+                    <input
+                      type="file"
+                      id="prod-image-file"
+                      className="products-file-input"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                    />
+                    <span className="products-field-hint">
+                      Supported formats: PNG, JPG, WebP. Recommended: 800x600px or square.
+                    </span>
+                  </div>
+
+                  {imagePreviewUrl && (
+                    <div className="products-image-preview-card">
+                      <img src={imagePreviewUrl} alt="Preview" />
+                      <button
+                        type="button"
+                        className="products-remove-preview-btn"
+                        onClick={clearSelectedImage}
+                        title="Remove selected image"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="products-form-actions">
+              <button
+                type="submit"
+                className="products-btn products-btn-primary"
+                disabled={saving}
+              >
+                {saving
+                  ? "Saving to Catalog..."
+                  : editingId
+                  ? "Update Product"
+                  : "Add Product"}
+              </button>
+
+              <button
+                type="button"
+                className="products-btn products-btn-secondary"
+                onClick={cancelEdit}
+                disabled={saving}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </section>
+      )}
+
+      {/* Main Products Catalog Section */}
+      <section className="products-section">
+        {/* Controls Bar */}
+        <div className="products-controls-bar">
+          {/* Search box */}
+          <div className="products-search-box">
+            <input
+              type="text"
+              className="products-search-input"
+              placeholder="🔍 Search products or descriptions..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
+              <button
+                className="products-search-clear"
+                onClick={() => setSearchQuery("")}
+                title="Clear search"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
+          {/* Category, Status & Sort Filters */}
+          <div className="products-filters-group">
+            {/* Category dropdown */}
+            <select
+              className="products-select-filter"
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+            >
+              <option value="all">All Categories</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.name}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+
+            {/* Status pills */}
+            <div className="products-filter-pills">
+              <button
+                type="button"
+                className={`products-pill-btn ${statusFilter === "all" ? "active" : ""}`}
+                onClick={() => setStatusFilter("all")}
+              >
+                All ({stats.total})
+              </button>
+              <button
+                type="button"
+                className={`products-pill-btn ${statusFilter === "available" ? "active" : ""}`}
+                onClick={() => setStatusFilter("available")}
+              >
+                Available ({stats.available})
+              </button>
+              <button
+                type="button"
+                className={`products-pill-btn ${statusFilter === "unavailable" ? "active" : ""}`}
+                onClick={() => setStatusFilter("unavailable")}
+              >
+                Unavailable ({stats.unavailable})
+              </button>
+            </div>
+
+            {/* Sort */}
+            <select
+              className="products-select-filter"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+            >
+              <option value="newest">Sort: Recently Added</option>
+              <option value="name_asc">Sort: Name (A-Z)</option>
+              <option value="name_desc">Sort: Name (Z-A)</option>
+              <option value="price_asc">Sort: Price (Low to High)</option>
+              <option value="price_desc">Sort: Price (High to Low)</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Catalog Body */}
         {loading ? (
-          <p>Loading products...</p>
-        ) : products.length === 0 ? (
-          <p>No products added yet.</p>
-        ) : (
-          products.map((product) => (
-            <div key={product.id}>
-              {product.image_url && (
-                <div>
-                  <img
-                    src={product.image_url}
-                    alt={product.name}
-                    style={{
-                      width: "150px",
-                      height: "120px",
-                      objectFit: "cover",
+          <div className="products-empty-state">
+            <div className="products-empty-icon">⏳</div>
+            <h3>Loading Bakery Catalog...</h3>
+            <p>Fetching menu items, pricing, and availability.</p>
+          </div>
+        ) : filteredProducts.length === 0 ? (
+          <div className="products-empty-state">
+            <div className="products-empty-icon">🥐</div>
+            {products.length === 0 ? (
+              <>
+                <h3>Your Product Menu is Empty</h3>
+                <p>
+                  Start adding handcrafted cakes, pastries, breads, and cookies to delight your online bakery customers.
+                </p>
+                <div className="products-empty-actions">
+                  <button
+                    type="button"
+                    className="products-btn products-btn-primary"
+                    onClick={() => {
+                      setForm(emptyForm);
+                      setEditingId(null);
+                      setImagePreviewUrl(null);
+                      setIsFormOpen(true);
                     }}
-                  />
-
-                  <br />
+                  >
+                    + Add Your First Product
+                  </button>
 
                   <button
                     type="button"
-                    onClick={() => handleDeleteImage(product)}
+                    className="products-btn products-btn-secondary"
+                    onClick={handleSeedProducts}
+                    disabled={seeding}
                   >
-                    Delete Image
+                    {seeding ? "Loading..." : "⚡ Load Menu Essentials"}
                   </button>
                 </div>
-              )}
-
-              <h3>{product.name}</h3>
-              <p>{product.description}</p>
-              <p>Price: ₹{product.price}</p>
-              <p>Category: {product.category}</p>
-
-              {/* Availability Status */}
-              <p>
-                Status:{" "}
-                <strong
-                  style={{
-                    color: product.is_available ? "green" : "red",
+              </>
+            ) : (
+              <>
+                <h3>No Products Found</h3>
+                <p>
+                  No products match your current search and filter settings.
+                </p>
+                <button
+                  type="button"
+                  className="products-btn products-btn-secondary"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setSelectedCategory("all");
+                    setStatusFilter("all");
                   }}
                 >
-                  {product.is_available
-                    ? "Available"
-                    : "Unavailable"}
-                </strong>
-              </p>
+                  Clear Filters
+                </button>
+              </>
+            )}
+          </div>
+        ) : (
+          <div className="products-grid">
+            {filteredProducts.map((product) => {
+              const isUpdating = updatingAvailability === product.id;
+              const isAvail = product.is_available !== false;
 
-              {/* Availability Toggle */}
-              <button
-                type="button"
-                onClick={() => handleToggleAvailability(product)}
-                disabled={updatingAvailability === product.id}
-              >
-                {updatingAvailability === product.id
-                  ? "Updating..."
-                  : product.is_available
-                    ? "Mark Unavailable"
-                    : "Mark Available"}
-              </button>
+              return (
+                <div className="product-card" key={product.id}>
+                  {/* Media */}
+                  <div className="product-card-media">
+                    {product.image_url ? (
+                      <img
+                        src={product.image_url}
+                        alt={product.name}
+                        className="product-card-img"
+                      />
+                    ) : (
+                      <div className="product-card-img-placeholder">
+                        {product.category?.includes("CAKE")
+                          ? "🎂"
+                          : product.category?.includes("BREAD")
+                          ? "🥖"
+                          : product.category?.includes("COOKIE")
+                          ? "🍪"
+                          : "🥐"}
+                        <span>The Golden Crust</span>
+                      </div>
+                    )}
 
-              <button onClick={() => handleEdit(product)}>
-                Edit
-              </button>
+                    {/* Floating Badges */}
+                    <div className="product-card-badges">
+                      <span className="product-category-badge">
+                        {product.category || "Bakery"}
+                      </span>
+                      <span
+                        className={`product-status-badge ${
+                          isAvail ? "available" : "unavailable"
+                        }`}
+                      >
+                        <span className="product-status-dot" />
+                        {isAvail ? "Available" : "Unavailable"}
+                      </span>
+                    </div>
+                  </div>
 
-              <button onClick={() => handleDelete(product.id)}>
-                Delete
-              </button>
-            </div>
-          ))
+                  {/* Body */}
+                  <div className="product-card-body">
+                    <div className="product-card-title-row">
+                      <h3 className="product-card-title">{product.name}</h3>
+                      <span className="product-card-price">
+                        ₹{Number(product.price).toLocaleString("en-IN")}
+                      </span>
+                    </div>
+
+                    <p className="product-card-desc">
+                      {product.description || "Freshly baked in our ovens daily."}
+                    </p>
+
+                    {/* Actions */}
+                    <div className="product-card-actions">
+                      <button
+                        type="button"
+                        className="product-action-btn product-toggle-btn"
+                        onClick={() => handleToggleAvailability(product)}
+                        disabled={isUpdating}
+                        title={
+                          isAvail
+                            ? "Click to mark out of stock"
+                            : "Click to mark available"
+                        }
+                      >
+                        {isUpdating
+                          ? "Updating..."
+                          : isAvail
+                          ? "Pause Item"
+                          : "Activate"}
+                      </button>
+
+                      {product.image_url && (
+                        <button
+                          type="button"
+                          className="product-action-btn product-delete-img-btn"
+                          onClick={() => handleDeleteImage(product)}
+                          title="Delete photo"
+                        >
+                          Remove Photo
+                        </button>
+                      )}
+
+                      <button
+                        type="button"
+                        className="product-action-btn product-edit-btn"
+                        onClick={() => handleEdit(product)}
+                      >
+                        Edit
+                      </button>
+
+                      <button
+                        type="button"
+                        className="product-action-btn product-delete-btn"
+                        onClick={() => handleDelete(product.id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         )}
       </section>
     </div>
