@@ -5,6 +5,7 @@
   color: #432719;
 }
 
+/* Header */
 .admin-dashboard header {
   display: flex;
   justify-content: space-between;
@@ -24,54 +25,30 @@
   background: #fff8ef;
   color: #432719;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   font-weight: bold;
+  transition: 0.3s ease;
 }
 
-.admin-dashboard main {
-  padding: 45px 5%;
+.admin-dashboard header button:hover {
+  background: #e8d3bd;
+  transform: translateY(-2px);
 }
 
-.admin-dashboard main h2 {
-  font-size: 30px;
-  margin-bottom: 10px;
-}
-
-.admin-dashboard main p {
-  color: #8a6b58;
-}
-
-.admin-dashboard main h3 {
-  margin-top: 35px;
-  font-size: 22px;
-}
-
-@media (max-width: 600px) {
-  .admin-dashboard header h1 {
-    font-size: 16px;
-  }
-
-  .admin-dashboard main {
-    padding: 30px 20px;
-  }
-
-  .admin-dashboard main h2 {
-    font-size: 24px;
-  }
-}
-
-
+/* Main layout */
 .admin-layout {
   display: flex;
   min-height: calc(100vh - 75px);
 }
 
+/* Sidebar */
 .admin-sidebar {
   width: 240px;
   flex-shrink: 0;
   background: #f0e2d2;
   padding: 30px 20px;
+  box-sizing: border-box;
 }
 
 .admin-sidebar h3 {
@@ -86,35 +63,95 @@
   gap: 10px;
 }
 
-.admin-sidebar nav a {
-  text-decoration: none;
-  color: #432719;
+/* Sidebar buttons */
+.admin-sidebar nav button {
+  width: 100%;
   padding: 13px 15px;
-  border-radius: 7px;
+  background: transparent;
+  color: #432719;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-size: 16px;
   font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.25s ease;
 }
 
-.admin-sidebar nav a:hover,
-.admin-sidebar nav a.active {
+.admin-sidebar nav button:hover {
+  background: #dfc7af;
+  transform: translateX(3px);
+}
+
+.admin-sidebar nav button.active {
   background: #432719;
-  color: white;
+  color: #fff8ef;
+  box-shadow: 0 3px 8px rgba(67, 39, 25, 0.15);
 }
 
+/* Dashboard main area */
 .admin-main {
   flex: 1;
   min-width: 0;
-  padding: 35px;
+  padding: 40px;
+  box-sizing: border-box;
 }
 
 .admin-welcome {
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 
 .admin-welcome h2 {
-  margin-bottom: 10px;
-  font-size: 28px;
+  font-size: 32px;
+  margin-bottom: 12px;
 }
 
+.admin-welcome p {
+  color: #8a6b58;
+  font-size: 17px;
+  margin-bottom: 5px;
+}
+
+/* Refresh Dashboard */
+.admin-welcome button {
+  margin-top: 15px;
+  padding: 12px 22px;
+  background: #432719;
+  color: #fff8ef;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.admin-welcome button:hover {
+  background: #8b5e3c;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 12px rgba(67, 39, 25, 0.15);
+}
+
+/* Back to Website */
+.admin-main > button {
+  margin: 5px 0 25px;
+  padding: 12px 22px;
+  background: #8b5e3c;
+  color: #fff8ef;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.admin-main > button:hover {
+  background: #432719;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 12px rgba(67, 39, 25, 0.15);
+}
+
+/* Statistics cards */
 .admin-stats {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -123,192 +160,165 @@
 
 .stat-card {
   background: white;
-  padding: 25px;
-  border-radius: 12px;
+  padding: 30px;
+  border-radius: 15px;
   box-shadow: 0 4px 15px rgba(67, 39, 25, 0.07);
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(67, 39, 25, 0.12);
 }
 
 .stat-card h3 {
-  font-size: 15px;
+  font-size: 17px;
   color: #8a6b58;
+  margin: 0;
 }
 
 .stat-card p {
-  font-size: 32px;
+  font-size: 36px;
   font-weight: bold;
   color: #432719;
-  margin-top: 15px;
+  margin-top: 20px;
 }
 
+/* Quick Actions */
 .admin-content {
-  margin-top: 40px;
+  margin-top: 45px;
+}
+
+.admin-content h2 {
+  font-size: 30px;
+  margin-bottom: 20px;
 }
 
 .admin-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 15px;
-  margin-top: 20px;
 }
 
 .admin-actions button {
-  padding: 15px 22px;
+  padding: 18px 28px;
   background: #432719;
-  color: white;
+  color: #fff8ef;
   border: none;
-  border-radius: 7px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 500;
   cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .admin-actions button:hover {
-  background: #70432d;
+  background: #8b5e3c;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(67, 39, 25, 0.2);
 }
 
-@media (max-width: 900px) {
+.admin-actions button:active {
+  transform: scale(0.97);
+}
+
+/* Tablet */
+@media (max-width: 1000px) {
   .admin-stats {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  .admin-main {
+    padding: 30px;
+  }
 }
 
+/* Mobile */
 @media (max-width: 600px) {
+  .admin-dashboard header {
+    padding: 18px 5%;
+  }
+
+  .admin-dashboard header h1 {
+    font-size: 16px;
+    letter-spacing: 1px;
+  }
+
+  .admin-dashboard header button {
+    padding: 9px 14px;
+  }
+
   .admin-layout {
     flex-direction: column;
   }
 
   .admin-sidebar {
     width: 100%;
-    box-sizing: border-box;
+    padding: 22px 18px;
+  }
+
+  .admin-sidebar h3 {
+    margin-bottom: 18px;
   }
 
   .admin-sidebar nav {
-    flex-direction: row;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .admin-sidebar nav button {
+    text-align: center;
+    padding: 12px 8px;
+    font-size: 14px;
+  }
+
+  .admin-sidebar nav button:hover {
+    transform: none;
   }
 
   .admin-main {
     padding: 25px 18px;
   }
 
+  .admin-welcome h2 {
+    font-size: 25px;
+  }
+
+  .admin-welcome p {
+    font-size: 15px;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-welcome button,
+  .admin-main > button {
+    width: 100%;
+  }
+
   .admin-stats {
     grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .stat-card {
+    padding: 22px;
+  }
+
+  .stat-card p {
+    font-size: 30px;
+  }
+
+  .admin-content h2 {
+    font-size: 25px;
   }
 
   .admin-actions {
     flex-direction: column;
+    gap: 12px;
   }
 
   .admin-actions button {
     width: 100%;
-  }
-}
-/* Admin navigation buttons */
-.admin-panel button,
-.admin-sidebar button,
-.dashboard-sidebar button,
-.sidebar button {
-  width: 100%;
-  padding: 14px 18px;
-  margin-bottom: 14px;
-
-  background: #432719;
-  color: #fff8ef;
-
-  border: 1px solid #6b422c;
-  border-radius: 10px;
-
-  font-size: 18px;
-  font-weight: 500;
-  cursor: pointer;
-
-  transition: all 0.3s ease;
-}
-
-/* Hover effect */
-.admin-panel button:hover,
-.admin-sidebar button:hover,
-.dashboard-sidebar button:hover,
-.sidebar button:hover {
-  background: #8b5e3c;
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 5px 12px rgba(67, 39, 25, 0.2);
-}
-
-/* Click effect */
-.admin-panel button:active,
-.admin-sidebar button:active,
-.dashboard-sidebar button:active,
-.sidebar button:active {
-  transform: scale(0.98);
-}
-
-/* Mobile */
-@media (max-width: 600px) {
-  .admin-panel button,
-  .admin-sidebar button,
-  .dashboard-sidebar button,
-  .sidebar button {
-    padding: 12px;
-    font-size: 16px;
-  }
-}
-/* Dashboard header buttons */
-.dashboard-header button,
-.dashboard button {
-  background: #432719;
-  color: #fff8ef;
-  border: none;
-  padding: 12px 22px;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: 0.3s ease;
-}
-
-.dashboard-header button:hover,
-.dashboard button:hover {
-  background: #8b5e3c;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(67, 39, 25, 0.15);
-}
-
-/* Quick Action buttons */
-.quick-actions button {
-  background: #432719;
-  color: #fff8ef;
-  border: none;
-  padding: 18px 30px;
-  border-radius: 12px;
-  font-size: 17px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.quick-actions button:hover {
-  background: #8b5e3c;
-  transform: translateY(-3px);
-  box-shadow: 0 6px 15px rgba(67, 39, 25, 0.2);
-}
-
-.quick-actions button:active {
-  transform: scale(0.97);
-}
-
-/* Mobile responsive */
-@media (max-width: 600px) {
-  .dashboard-header button {
-    width: 100%;
-  }
-
-  .quick-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .quick-actions button {
-    width: 100%;
+    padding: 16px;
   }
 }
