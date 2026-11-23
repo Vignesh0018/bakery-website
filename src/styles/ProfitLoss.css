@@ -1,0 +1,558 @@
+/* ==========================================================================
+   Profit & Loss Statement Styles - The Golden Crust Bakery
+   ========================================================================== */
+
+.profitloss-page {
+  min-height: 100vh;
+  padding: 40px 6%;
+  background: #fff8ef;
+  color: #432719;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+/* Header */
+.profitloss-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+.profitloss-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.profitloss-header-left h1 {
+  font-size: 32px;
+  margin: 0;
+  color: #432719;
+  letter-spacing: -0.5px;
+  font-weight: 800;
+}
+
+.profitloss-health-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.profitloss-health-badge.profitable {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #c8e6c9;
+}
+
+.profitloss-health-badge.loss {
+  background: #ffebee;
+  color: #c62828;
+  border: 1px solid #ffcdd2;
+}
+
+.profitloss-header-left p {
+  color: #8a6b58;
+  margin: 0;
+  font-size: 15px;
+}
+
+.profitloss-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Buttons */
+.profitloss-btn {
+  padding: 11px 18px;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.25s ease;
+  text-decoration: none;
+}
+
+.profitloss-btn-primary {
+  background: #432719;
+  color: #fff8ef;
+}
+
+.profitloss-btn-primary:hover:not(:disabled) {
+  background: #8b5e3c;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(67, 39, 25, 0.2);
+}
+
+.profitloss-btn-secondary {
+  background: #f0e2d2;
+  color: #432719;
+  border: 1px solid #d8c5b5;
+}
+
+.profitloss-btn-secondary:hover:not(:disabled) {
+  background: #dfc7af;
+  transform: translateY(-2px);
+}
+
+/* Timeframe Filter Bar */
+.profitloss-timeframe-bar {
+  background: #ffffff;
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: 1px solid #ead9c8;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 25px;
+  box-shadow: 0 2px 8px rgba(67, 39, 25, 0.04);
+}
+
+.profitloss-timeframe-label {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #8a6b58;
+}
+
+.profitloss-timeframe-pills {
+  display: flex;
+  background: #f0e2d2;
+  padding: 4px;
+  border-radius: 8px;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.profitloss-time-pill {
+  padding: 7px 14px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #432719;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.profitloss-time-pill:hover {
+  background: rgba(67, 39, 25, 0.08);
+}
+
+.profitloss-time-pill.active {
+  background: #432719;
+  color: #fff8ef;
+  box-shadow: 0 2px 6px rgba(67, 39, 25, 0.15);
+}
+
+/* Banner */
+.profitloss-banner-error {
+  background: #ffebee;
+  color: #c62828;
+  border: 1px solid #ffcdd2;
+  padding: 14px 18px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+/* Executive KPI Grid */
+.profitloss-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 18px;
+  margin-bottom: 30px;
+}
+
+.profitloss-kpi-card {
+  background: #ffffff;
+  padding: 22px 24px;
+  border-radius: 14px;
+  border: 1px solid #ead9c8;
+  box-shadow: 0 4px 15px rgba(67, 39, 25, 0.05);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.profitloss-kpi-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 22px rgba(67, 39, 25, 0.1);
+}
+
+.profitloss-kpi-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.profitloss-kpi-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #8a6b58;
+}
+
+.profitloss-kpi-icon {
+  font-size: 22px;
+}
+
+.profitloss-kpi-val {
+  font-size: 28px;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1.1;
+  color: #432719;
+}
+
+.profitloss-kpi-desc {
+  font-size: 12px;
+  color: #9c806d;
+  margin-top: 8px;
+  display: block;
+}
+
+.profitloss-kpi-card.net.profit {
+  border-color: #2e7d32;
+  background: #fdfefd;
+}
+
+.profitloss-kpi-card.net.profit .profitloss-kpi-val {
+  color: #2e7d32;
+}
+
+.profitloss-kpi-card.net.loss {
+  border-color: #c62828;
+  background: #fffdfd;
+}
+
+.profitloss-kpi-card.net.loss .profitloss-kpi-val {
+  color: #c62828;
+}
+
+/* Statement Section */
+.profitloss-section {
+  background: #ffffff;
+  padding: 30px;
+  margin-bottom: 30px;
+  border-radius: 16px;
+  border: 1px solid #ead9c8;
+  box-shadow: 0 5px 20px rgba(67, 39, 25, 0.06);
+}
+
+.profitloss-statement-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 24px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #f0e2d2;
+}
+
+.profitloss-statement-header h2 {
+  font-size: 22px;
+  margin: 0 0 6px 0;
+  color: #432719;
+  font-weight: 800;
+}
+
+.profitloss-statement-subtitle {
+  font-size: 13px;
+  color: #8a6b58;
+  margin: 0;
+}
+
+.profitloss-quick-ratios {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.ratio-item {
+  background: #fdf8f3;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid #ead9c8;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ratio-label {
+  color: #8a6b58;
+  font-weight: 600;
+}
+
+.ratio-val {
+  font-weight: 800;
+  color: #432719;
+}
+
+/* Accounting Table */
+.profitloss-table-wrapper {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid #ead9c8;
+}
+
+.profitloss-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  text-align: left;
+}
+
+.profitloss-table th {
+  background: #fdf8f3;
+  color: #8a6b58;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 14px 18px;
+  border-bottom: 2px solid #ead9c8;
+}
+
+.profitloss-table td {
+  padding: 12px 18px;
+  border-bottom: 1px solid #f5ede4;
+  vertical-align: middle;
+}
+
+/* Row types */
+.pl-section-row td {
+  background: #fdf8f3;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #8b5e3c;
+  padding-top: 18px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #ead9c8;
+}
+
+.pl-sub-row td {
+  color: #432719;
+  font-size: 14px;
+}
+
+.pl-indent {
+  padding-left: 18px;
+  display: inline-block;
+}
+
+.pl-amt {
+  text-align: right;
+  font-family: monospace;
+  font-size: 14px;
+  font-weight: 600;
+  color: #432719;
+}
+
+.pl-pct {
+  text-align: right;
+  font-size: 13px;
+  color: #8a6b58;
+  font-weight: 600;
+}
+
+.pl-total-row td {
+  background: #faf4ed;
+  font-weight: 700;
+  border-top: 1px solid #d8c5b5;
+  border-bottom: 2px solid #d8c5b5;
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+.pl-grand-row td {
+  padding-top: 16px;
+  padding-bottom: 16px;
+  font-size: 15px;
+}
+
+.gross-profit-row {
+  background: #f4faee;
+  border-top: 2px solid #a5d6a7;
+  border-bottom: 2px solid #a5d6a7;
+}
+
+.gross-profit-row td {
+  color: #1b5e20;
+}
+
+.net-profit-row {
+  background: #fdf6ec;
+  border-top: 2px solid #432719;
+  border-bottom: 3px double #432719;
+}
+
+.net-profit-row.profit {
+  background: #e8f5e9;
+  border-color: #2e7d32;
+}
+
+.net-profit-row.loss {
+  background: #ffebee;
+  border-color: #c62828;
+}
+
+.grand-val {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.pl-bottom-note {
+  font-size: 12px;
+  font-weight: normal;
+  color: #725847;
+  margin-top: 4px;
+}
+
+/* Benchmark Grid */
+.profitloss-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.profitloss-section-header h2 {
+  font-size: 20px;
+  margin: 0;
+  color: #432719;
+  font-weight: 800;
+}
+
+.profitloss-badge {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  background: #432719;
+  color: #fff8ef;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.profitloss-benchmarks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.benchmark-card {
+  background: #fdfaf6;
+  border: 1px solid #ead9c8;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.benchmark-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.benchmark-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #432719;
+}
+
+.benchmark-score {
+  font-size: 16px;
+  font-weight: 800;
+  color: #8b5e3c;
+}
+
+.benchmark-progress-bar {
+  height: 8px;
+  background: #ebdcd0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.benchmark-progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+.benchmark-desc {
+  font-size: 12px;
+  color: #725847;
+  line-height: 1.45;
+  margin: 0;
+}
+
+/* Print Styles */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .profitloss-page {
+    padding: 0 !important;
+    background: #ffffff !important;
+  }
+
+  .profitloss-section {
+    box-shadow: none !important;
+    border: 1px solid #cccccc !important;
+    padding: 15px !important;
+  }
+
+  .profitloss-kpi-card {
+    box-shadow: none !important;
+    border: 1px solid #cccccc !important;
+  }
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+  .profitloss-page {
+    padding: 24px 4%;
+  }
+
+  .profitloss-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .profitloss-header-actions {
+    width: 100%;
+  }
+
+  .profitloss-header-actions button {
+    flex: 1;
+    justify-content: center;
+  }
+}
