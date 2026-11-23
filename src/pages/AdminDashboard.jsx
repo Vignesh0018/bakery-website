@@ -283,6 +283,24 @@ function AdminDashboard() {
                 <span className="admin-sidebar-icon">🌾</span>
                 Inventory
               </button>
+
+              <button
+                type="button"
+                className="admin-sidebar-btn"
+                onClick={() => navigate("/admin/expenses")}
+              >
+                <span className="admin-sidebar-icon">💸</span>
+                Expenses
+              </button>
+
+              <button
+                type="button"
+                className="admin-sidebar-btn"
+                onClick={() => navigate("/admin/profit-loss")}
+              >
+                <span className="admin-sidebar-icon">📈</span>
+                Profit & Loss
+              </button>
             </nav>
           </div>
 
