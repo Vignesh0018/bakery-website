@@ -13,6 +13,8 @@ import Products from "./pages/Products";
 import Orders from "./pages/Orders";
 import Categories from "./pages/Categories";
 import Inventory from "./pages/Inventory";
+import Expenses from "./pages/Expenses";
+import ProfitLoss from "./pages/ProfitLoss";
 
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -46,6 +48,8 @@ function App() {
         <Route path="/admin/categories" element={<Categories />} />
         <Route path="/admin/customers" element={<Adminproducts />} />
         <Route path="/admin/inventory" element={<Inventory />} />
+        <Route path="/admin/expenses" element={<Expenses />} />
+        <Route path="/admin/profit-loss" element={<ProfitLoss />} />
       </Routes>
     </BrowserRouter>
   );
