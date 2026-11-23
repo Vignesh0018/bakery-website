@@ -472,6 +472,48 @@ function AdminDashboard() {
               </p>
               <span className="dashboard-stat-desc">Net bakery sales</span>
             </div>
+
+            {/* Total Expenses */}
+            <div
+              className="dashboard-stat-card"
+              onClick={() => navigate("/admin/expenses")}
+              title="Click to view & manage Expenses"
+            >
+              <div className="dashboard-stat-header">
+                <span className="dashboard-stat-title">Total Expenses</span>
+                <span className="dashboard-stat-icon">💸</span>
+              </div>
+              <p className="dashboard-stat-value" style={{ color: "#c62828", fontSize: "28px" }}>
+                ₹{stats.totalExpenses.toLocaleString("en-IN")}
+              </p>
+              <span className="dashboard-stat-desc">Ingredients, utilities & overheads</span>
+            </div>
+
+            {/* Net Operating Profit */}
+            <div
+              className="dashboard-stat-card"
+              onClick={() => navigate("/admin/profit-loss")}
+              title="Click to view Profit & Loss Statement"
+            >
+              <div className="dashboard-stat-header">
+                <span className="dashboard-stat-title">Net Operating Profit</span>
+                <span className="dashboard-stat-icon">
+                  {stats.netProfit >= 0 ? "📈" : "📉"}
+                </span>
+              </div>
+              <p
+                className="dashboard-stat-value"
+                style={{
+                  color: stats.netProfit >= 0 ? "#1b5e20" : "#c62828",
+                  fontSize: "28px",
+                }}
+              >
+                ₹{stats.netProfit.toLocaleString("en-IN")}
+              </p>
+              <span className="dashboard-stat-desc">
+                {stats.netProfit >= 0 ? "Surplus (Profitable)" : "Deficit (Operating Loss)"}
+              </span>
+            </div>
           </div>
 
           {/* Recent Orders Section */}
