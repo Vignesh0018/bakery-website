@@ -1,142 +1,17 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
+import {
+  EXPENSE_CATEGORIES,
+  PAYMENT_METHODS,
+  SAMPLE_EXPENSES,
+  SUPABASE_SQL_HELPER,
+  generateExpenseId,
+  getTodayDateString,
+} from "../constants/expenses";
 import "../styles/Expenses.css";
 
-export const EXPENSE_CATEGORIES = [
-  { id: "Raw Ingredients", name: "Raw Ingredients", icon: "🌾", type: "COGS" },
-  { id: "Packaging & Boxes", name: "Packaging & Boxes", icon: "📦", type: "COGS" },
-  { id: "Utilities & Fuel", name: "Utilities & Fuel", icon: "⚡", type: "OpEx" },
-  { id: "Staff & Wages", name: "Staff & Wages", icon: "👨‍🍳", type: "OpEx" },
-  { id: "Rent & Kitchen Lease", name: "Rent & Kitchen Lease", icon: "🏠", type: "OpEx" },
-  { id: "Equipment & Maintenance", name: "Equipment & Maintenance", icon: "🔧", type: "OpEx" },
-  { id: "Marketing & Tech", name: "Marketing & Tech", icon: "📢", type: "OpEx" },
-  { id: "Miscellaneous", name: "Miscellaneous", icon: "🧾", type: "OpEx" },
-];
-
-export const PAYMENT_METHODS = [
-  "UPI / GPay",
-  "Cash",
-  "Bank Transfer",
-  "Debit / Credit Card",
-  "Cheque",
-];
-
-// Pre-packaged bakery sample operational expenses
-const SAMPLE_EXPENSES = [
-  {
-    id: "sample-exp-1",
-    title: "Commercial Bread Flour & Normandy Butter",
-    category: "Raw Ingredients",
-    amount: 14500,
-    expense_date: new Date(Date.now() - 2 * 86400000).toISOString().split("T")[0],
-    payment_method: "Bank Transfer",
-    vendor: "Golden Mill Grains Ltd",
-    notes: "20 bags organic bread flour, 15kg European unsalted butter",
-    created_at: new Date(Date.now() - 2 * 86400000).toISOString(),
-  },
-  {
-    id: "sample-exp-2",
-    title: "Belgian Dark Chocolate 70% & Vanilla Pods",
-    category: "Raw Ingredients",
-    amount: 6200,
-    expense_date: new Date(Date.now() - 4 * 86400000).toISOString().split("T")[0],
-    payment_method: "UPI / GPay",
-    vendor: "Artisan Cocoa Importers",
-    notes: "Premium Callebaut callets for chocolate fudge cakes & ganache",
-    created_at: new Date(Date.now() - 4 * 86400000).toISOString(),
-  },
-  {
-    id: "sample-exp-3",
-    title: "Biodegradable Cake Boxes & Pastry Bags",
-    category: "Packaging & Boxes",
-    amount: 3800,
-    expense_date: new Date(Date.now() - 6 * 86400000).toISOString().split("T")[0],
-    payment_method: "UPI / GPay",
-    vendor: "GreenPack Bakery Supplies",
-    notes: "500 embossed cake boxes with window and greaseproof liners",
-    created_at: new Date(Date.now() - 6 * 86400000).toISOString(),
-  },
-  {
-    id: "sample-exp-4",
-    title: "Commercial Deck Oven Electricity & Power",
-    category: "Utilities & Fuel",
-    amount: 8900,
-    expense_date: new Date(Date.now() - 8 * 86400000).toISOString().split("T")[0],
-    payment_method: "Bank Transfer",
-    vendor: "City Electricity Board",
-    notes: "Monthly commercial energy tariff for baking decks & walk-in chiller",
-    created_at: new Date(Date.now() - 8 * 86400000).toISOString(),
-  },
-  {
-    id: "sample-exp-5",
-    title: "Head Pastry Chef & Kitchen Assistants Wages",
-    category: "Staff & Wages",
-    amount: 24000,
-    expense_date: new Date(Date.now() - 11 * 86400000).toISOString().split("T")[0],
-    payment_method: "Bank Transfer",
-    vendor: "Bakery Kitchen Staff",
-    notes: "Bi-weekly payroll for head baker, 2 prep cooks & cleaner",
-    created_at: new Date(Date.now() - 11 * 86400000).toISOString(),
-  },
-  {
-    id: "sample-exp-6",
-    title: "Storefront & Kitchen Commercial Lease",
-    category: "Rent & Kitchen Lease",
-    amount: 28000,
-    expense_date: new Date(Date.now() - 16 * 86400000).toISOString().split("T")[0],
-    payment_method: "Bank Transfer",
-    vendor: "Heritage Commercial Properties",
-    notes: "Monthly bakery storefront and baking facility lease",
-    created_at: new Date(Date.now() - 16 * 86400000).toISOString(),
-  },
-  {
-    id: "sample-exp-7",
-    title: "Spiral Dough Mixer Service & Belt Tuning",
-    category: "Equipment & Maintenance",
-    amount: 2400,
-    expense_date: new Date(Date.now() - 14 * 86400000).toISOString().split("T")[0],
-    payment_method: "Cash",
-    vendor: "KitchenFix Commercial Care",
-    notes: "Safety inspection, motor belt tensioning, food-grade greasing",
-    created_at: new Date(Date.now() - 14 * 86400000).toISOString(),
-  },
-  {
-    id: "sample-exp-8",
-    title: "Instagram Ads & Local Weekend Flyer Campaign",
-    category: "Marketing & Tech",
-    amount: 1950,
-    expense_date: new Date(Date.now() - 3 * 86400000).toISOString().split("T")[0],
-    payment_method: "Debit / Credit Card",
-    vendor: "Meta Advertising & Local Print",
-    notes: "Promoting fresh sourdough delivery and weekend tea cakes",
-    created_at: new Date(Date.now() - 3 * 86400000).toISOString(),
-  },
-];
-
 const LOCAL_STORAGE_KEY = "golden_crust_expenses";
-
-// SQL helper script to set up Supabase table
-const SUPABASE_SQL_HELPER = `-- Run this in your Supabase SQL Editor:
-CREATE TABLE IF NOT EXISTS public.expenses (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    title TEXT NOT NULL,
-    category TEXT NOT NULL,
-    amount NUMERIC NOT NULL CHECK (amount >= 0),
-    expense_date DATE NOT NULL DEFAULT CURRENT_DATE,
-    payment_method TEXT DEFAULT 'UPI / GPay',
-    vendor TEXT,
-    notes TEXT,
-    created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-ALTER TABLE public.expenses ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Allow public read access to expenses"
-ON public.expenses FOR SELECT USING (true);
-
-CREATE POLICY "Allow full access to expenses"
-ON public.expenses FOR ALL USING (true);`;
 
 function Expenses() {
   const navigate = useNavigate();
@@ -158,7 +33,7 @@ function Expenses() {
     title: "",
     category: "Raw Ingredients",
     amount: "",
-    expense_date: new Date().toISOString().split("T")[0],
+    expense_date: getTodayDateString(),
     payment_method: "UPI / GPay",
     vendor: "",
     notes: "",
@@ -207,8 +82,6 @@ function Expenses() {
         .order("expense_date", { ascending: false });
 
       if (fetchErr) {
-        // Table not created or RLS error -> fallback to local storage
-        console.warn("Supabase expenses table note:", fetchErr.message);
         setIsUsingLocalStorage(true);
         const local = getLocalExpenses();
         setExpenses(local);
@@ -217,8 +90,7 @@ function Expenses() {
         setIsUsingLocalStorage(false);
         setExpenses(data || []);
       }
-    } catch (err) {
-      console.warn("Fetch failed, falling back to local data:", err);
+    } catch {
       setIsUsingLocalStorage(true);
       const local = getLocalExpenses();
       setExpenses(local);
@@ -273,6 +145,13 @@ function Expenses() {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  const cancelForm = () => {
+    setForm(emptyForm);
+    setEditingId(null);
+    setIsFormOpen(false);
+    setError("");
+  };
+
   // Create or update expense
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -299,7 +178,6 @@ function Expenses() {
 
     try {
       if (isUsingLocalStorage) {
-        // Local storage mode
         if (editingId) {
           const updated = expenses.map((item) =>
             item.id === editingId ? { ...item, ...payload } : item
@@ -310,7 +188,7 @@ function Expenses() {
         } else {
           const newItem = {
             ...payload,
-            id: `exp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+            id: generateExpenseId(),
             created_at: new Date().toISOString(),
           };
           const updated = [newItem, ...expenses];
@@ -320,7 +198,6 @@ function Expenses() {
         }
         cancelForm();
       } else {
-        // Supabase mode
         let result;
         if (editingId) {
           result = await supabase
@@ -340,7 +217,6 @@ function Expenses() {
         await fetchExpenses();
       }
     } catch (err) {
-      // Fallback on error
       if (err.code === "PGRST205" || err.code === "42501" || err.message?.includes("schema cache")) {
         setIsUsingLocalStorage(true);
         if (editingId) {
@@ -353,7 +229,7 @@ function Expenses() {
         } else {
           const newItem = {
             ...payload,
-            id: `exp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+            id: generateExpenseId(),
             created_at: new Date().toISOString(),
           };
           const updated = [newItem, ...expenses];
@@ -428,7 +304,6 @@ function Expenses() {
     }
   };
 
-  // Seed sample expenses
   const handleSeedExpenses = async () => {
     const confirmed = window.confirm(
       "Load realistic bakery operating expenses (flour, dairy, packaging, electricity, wages, rent, equipment)?"
@@ -460,8 +335,7 @@ function Expenses() {
         saveLocalExpenses(SAMPLE_EXPENSES);
         setSuccess("Bakery sample expenses loaded into browser storage!");
       }
-    } catch (err) {
-      // If table doesn't exist, load to localStorage
+    } catch {
       setIsUsingLocalStorage(true);
       setExpenses(SAMPLE_EXPENSES);
       saveLocalExpenses(SAMPLE_EXPENSES);
@@ -471,20 +345,12 @@ function Expenses() {
     }
   };
 
-  const cancelForm = () => {
-    setForm(emptyForm);
-    setEditingId(null);
-    setIsFormOpen(false);
-    setError("");
-  };
-
   const handleCopySql = () => {
     navigator.clipboard.writeText(SUPABASE_SQL_HELPER);
     setCopiedSql(true);
     setTimeout(() => setCopiedSql(false), 2500);
   };
 
-  // Export to CSV
   const handleExportCSV = () => {
     if (expenses.length === 0) {
       alert("No expenses to export.");
@@ -507,7 +373,7 @@ function Expenses() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `bakery-expenses-${new Date().toISOString().split("T")[0]}.csv`);
+    link.setAttribute("download", `bakery-expenses-${getTodayDateString()}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -520,7 +386,6 @@ function Expenses() {
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth();
 
-    // Search query
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
       list = list.filter(
@@ -532,17 +397,14 @@ function Expenses() {
       );
     }
 
-    // Category filter
     if (categoryFilter !== "all") {
       list = list.filter((x) => x.category === categoryFilter);
     }
 
-    // Payment method filter
     if (paymentFilter !== "all") {
       list = list.filter((x) => x.payment_method === paymentFilter);
     }
 
-    // Time period filter
     if (periodFilter === "this_month") {
       list = list.filter((x) => {
         const d = new Date(x.expense_date);
@@ -562,7 +424,6 @@ function Expenses() {
       });
     }
 
-    // Sorting
     list.sort((a, b) => {
       if (sortBy === "date_desc") {
         return new Date(b.expense_date) - new Date(a.expense_date);
@@ -608,7 +469,6 @@ function Expenses() {
       }
     });
 
-    // Determine top category
     let topCategory = "N/A";
     let topCatAmount = 0;
     Object.entries(catSums).forEach(([cat, sum]) => {
