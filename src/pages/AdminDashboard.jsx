@@ -18,6 +18,8 @@ function AdminDashboard() {
     totalInventory: 0,
     lowStockCount: 0,
     totalRevenue: 0,
+    totalExpenses: 0,
+    netProfit: 0,
   });
 
   // Fetch dashboard statistics
@@ -68,6 +70,31 @@ function AdminDashboard() {
         }
       });
 
+      // Fetch expenses
+      let expensesSum = 0;
+      try {
+        const { data: expData, error: expErr } = await supabase
+          .from("expenses")
+          .select("amount");
+        if (!expErr && expData && expData.length > 0) {
+          expensesSum = expData.reduce((acc, x) => acc + Number(x.amount || 0), 0);
+        } else {
+          const stored = localStorage.getItem("golden_crust_expenses");
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            expensesSum = parsed.reduce((acc, x) => acc + Number(x.amount || 0), 0);
+          }
+        }
+      } catch {
+        const stored = localStorage.getItem("golden_crust_expenses");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          expensesSum = parsed.reduce((acc, x) => acc + Number(x.amount || 0), 0);
+        }
+      }
+
+      const calculatedNetProfit = revenue - expensesSum;
+
       setStats({
         totalProducts: productsResult.count || 0,
         totalCategories: categoriesResult.count || 0,
@@ -77,6 +104,8 @@ function AdminDashboard() {
         totalInventory: inventoryResult.data ? inventoryResult.data.length : 0,
         lowStockCount: lowCount,
         totalRevenue: revenue,
+        totalExpenses: expensesSum,
+        netProfit: calculatedNetProfit,
       });
 
       setRecentOrders(recentOrdersResult.data || []);
