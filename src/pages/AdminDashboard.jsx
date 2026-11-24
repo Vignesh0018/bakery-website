@@ -136,21 +136,28 @@ function AdminDashboard() {
       try {
         const { data: expData, error: expErr } = await supabase
           .from("expenses")
-          .select("amount");
+          .select("id, amount");
         if (!expErr && expData && expData.length > 0) {
-          expensesSum = expData.reduce((acc, x) => acc + Number(x.amount || 0), 0);
+          const realExp = expData.filter((x) => !x.id?.startsWith?.("sample-exp-"));
+          expensesSum = realExp.reduce((acc, x) => acc + Number(x.amount || 0), 0);
         } else {
           const stored = localStorage.getItem("golden_crust_expenses");
           if (stored) {
             const parsed = JSON.parse(stored);
-            expensesSum = parsed.reduce((acc, x) => acc + Number(x.amount || 0), 0);
+            if (Array.isArray(parsed)) {
+              const realExp = parsed.filter((x) => !x.id?.startsWith("sample-exp-"));
+              expensesSum = realExp.reduce((acc, x) => acc + Number(x.amount || 0), 0);
+            }
           }
         }
       } catch {
         const stored = localStorage.getItem("golden_crust_expenses");
         if (stored) {
           const parsed = JSON.parse(stored);
-          expensesSum = parsed.reduce((acc, x) => acc + Number(x.amount || 0), 0);
+          if (Array.isArray(parsed)) {
+            const realExp = parsed.filter((x) => !x.id?.startsWith("sample-exp-"));
+            expensesSum = realExp.reduce((acc, x) => acc + Number(x.amount || 0), 0);
+          }
         }
       }
 

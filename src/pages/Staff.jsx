@@ -53,11 +53,22 @@ function Staff() {
   const getLocalStaff = () => {
     try {
       const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (stored) return JSON.parse(stored);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          const realStaff = parsed.filter(
+            (item) => !item.id?.startsWith("sample-staff-")
+          );
+          if (realStaff.length !== parsed.length) {
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(realStaff));
+          }
+          return realStaff;
+        }
+      }
     } catch (e) {
       console.warn("Could not read local staff data:", e);
     }
-    return SAMPLE_STAFF;
+    return [];
   };
 
   const saveLocalStaff = (items) => {
