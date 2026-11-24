@@ -380,71 +380,67 @@ function Expenses() {
   };
 
   // Filtered & Sorted Expenses
-  const filteredExpenses = useMemo(() => {
-    let list = [...expenses];
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth();
+  let filteredExpenses = [...expenses];
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth();
 
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase().trim();
-      list = list.filter(
-        (x) =>
-          x.title.toLowerCase().includes(q) ||
-          (x.vendor && x.vendor.toLowerCase().includes(q)) ||
-          (x.notes && x.notes.toLowerCase().includes(q)) ||
-          (x.category && x.category.toLowerCase().includes(q))
-      );
-    }
+  if (searchQuery.trim()) {
+    const q = searchQuery.toLowerCase().trim();
+    filteredExpenses = filteredExpenses.filter(
+      (x) =>
+        x.title.toLowerCase().includes(q) ||
+        (x.vendor && x.vendor.toLowerCase().includes(q)) ||
+        (x.notes && x.notes.toLowerCase().includes(q)) ||
+        (x.category && x.category.toLowerCase().includes(q))
+    );
+  }
 
-    if (categoryFilter !== "all") {
-      list = list.filter((x) => x.category === categoryFilter);
-    }
+  if (categoryFilter !== "all") {
+    filteredExpenses = filteredExpenses.filter((x) => x.category === categoryFilter);
+  }
 
-    if (paymentFilter !== "all") {
-      list = list.filter((x) => x.payment_method === paymentFilter);
-    }
+  if (paymentFilter !== "all") {
+    filteredExpenses = filteredExpenses.filter((x) => x.payment_method === paymentFilter);
+  }
 
-    if (periodFilter === "this_month") {
-      list = list.filter((x) => {
-        const d = new Date(x.expense_date);
-        return d.getFullYear() === currentYear && d.getMonth() === currentMonth;
-      });
-    } else if (periodFilter === "last_month") {
-      const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
-      const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
-      list = list.filter((x) => {
-        const d = new Date(x.expense_date);
-        return d.getFullYear() === lastMonthYear && d.getMonth() === lastMonth;
-      });
-    } else if (periodFilter === "this_year") {
-      list = list.filter((x) => {
-        const d = new Date(x.expense_date);
-        return d.getFullYear() === currentYear;
-      });
-    }
-
-    list.sort((a, b) => {
-      if (sortBy === "date_desc") {
-        return new Date(b.expense_date) - new Date(a.expense_date);
-      }
-      if (sortBy === "date_asc") {
-        return new Date(a.expense_date) - new Date(b.expense_date);
-      }
-      if (sortBy === "amount_desc") {
-        return Number(b.amount) - Number(a.amount);
-      }
-      if (sortBy === "amount_asc") {
-        return Number(a.amount) - Number(b.amount);
-      }
-      if (sortBy === "title_asc") {
-        return a.title.localeCompare(b.title);
-      }
-      return 0;
+  if (periodFilter === "this_month") {
+    filteredExpenses = filteredExpenses.filter((x) => {
+      const d = new Date(x.expense_date);
+      return d.getFullYear() === currentYear && d.getMonth() === currentMonth;
     });
+  } else if (periodFilter === "last_month") {
+    const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+    const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+    filteredExpenses = filteredExpenses.filter((x) => {
+      const d = new Date(x.expense_date);
+      return d.getFullYear() === lastMonthYear && d.getMonth() === lastMonth;
+    });
+  } else if (periodFilter === "this_year") {
+    filteredExpenses = filteredExpenses.filter((x) => {
+      const d = new Date(x.expense_date);
+      return d.getFullYear() === currentYear;
+    });
+  }
 
-    return list;
-  }, [expenses, searchQuery, categoryFilter, paymentFilter, periodFilter, sortBy]);
+  filteredExpenses.sort((a, b) => {
+    if (sortBy === "date_desc") {
+      return new Date(b.expense_date) - new Date(a.expense_date);
+    }
+    if (sortBy === "date_asc") {
+      return new Date(a.expense_date) - new Date(b.expense_date);
+    }
+    if (sortBy === "amount_desc") {
+      return Number(b.amount) - Number(a.amount);
+    }
+    if (sortBy === "amount_asc") {
+      return Number(a.amount) - Number(b.amount);
+    }
+    if (sortBy === "title_asc") {
+      return a.title.localeCompare(b.title);
+    }
+    return 0;
+  });
 
   // Statistics computation
   const stats = useMemo(() => {
