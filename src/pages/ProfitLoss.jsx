@@ -695,7 +695,9 @@ function ProfitLoss() {
             </div>
             <p className="benchmark-desc">
               Bakery Industry Benchmark: <strong>28% - 35%</strong>.
-              {Number(metrics.foodCostRatio) <= 35
+              {metrics.totalExpenses === 0 || (metrics.catMap["Raw Ingredients"] || 0) === 0
+                ? " ℹ️ Awaiting ingredient expense entries to calculate your live food cost ratio."
+                : Number(metrics.foodCostRatio) <= 35
                 ? " ✨ Excellent ingredient portion control."
                 : " ⚠️ Higher than target. Consider bulk purchasing or batch yield optimization."}
             </p>
@@ -718,7 +720,9 @@ function ProfitLoss() {
             </div>
             <p className="benchmark-desc">
               Bakery Industry Benchmark: <strong>25% - 32%</strong>.
-              {Number(metrics.laborRatio) <= 32
+              {metrics.totalExpenses === 0 || (metrics.catMap["Staff & Wages"] || 0) === 0
+                ? " ℹ️ Awaiting kitchen payroll entries to calculate labor cost percentage."
+                : Number(metrics.laborRatio) <= 32
                 ? " ✨ Balanced payroll efficiency."
                 : " ⚠️ High labor percentage. Scale order volume to absorb staff fixed hours."}
             </p>
@@ -741,6 +745,9 @@ function ProfitLoss() {
             </div>
             <p className="benchmark-desc">
               Bakery Industry Benchmark: <strong>under 15% - 18%</strong> of gross sales.
+              {metrics.totalExpenses === 0 || ((metrics.catMap["Rent & Kitchen Lease"] || 0) + (metrics.catMap["Utilities & Fuel"] || 0)) === 0
+                ? " ℹ️ Awaiting lease and utility bills to evaluate overhead burden."
+                : ""}
             </p>
           </div>
         </div>
