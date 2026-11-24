@@ -23,7 +23,13 @@ function Expenses() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isSqlModalOpen, setIsSqlModalOpen] = useState(false);
   const [isUsingLocalStorage, setIsUsingLocalStorage] = useState(false);
-  const [dismissedStorageBanner, setDismissedStorageBanner] = useState(false);
+  const [dismissedStorageBanner, setDismissedStorageBanner] = useState(() => {
+    try {
+      return localStorage.getItem("dismissed_expenses_storage_banner") === "true";
+    } catch {
+      return false;
+    }
+  });
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -576,7 +582,14 @@ function Expenses() {
             <button
               type="button"
               className="expenses-storage-close-btn"
-              onClick={() => setDismissedStorageBanner(true)}
+              onClick={() => {
+                setDismissedStorageBanner(true);
+                try {
+                  localStorage.setItem("dismissed_expenses_storage_banner", "true");
+                } catch (e) {
+                  console.warn("Storage save failed:", e);
+                }
+              }}
               title="Dismiss banner"
             >
               ✕
