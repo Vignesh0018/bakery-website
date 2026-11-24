@@ -142,6 +142,12 @@
   font-size: 20px;
 }
 
+.expenses-storage-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .expenses-storage-btn {
   background: #1565c0;
   color: #ffffff;
@@ -156,6 +162,22 @@
 
 .expenses-storage-btn:hover {
   background: #0d47a1;
+}
+
+.expenses-storage-close-btn {
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: #1565c0;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+
+.expenses-storage-close-btn:hover {
+  background: rgba(21, 101, 192, 0.12);
 }
 
 /* Notification Banners */
