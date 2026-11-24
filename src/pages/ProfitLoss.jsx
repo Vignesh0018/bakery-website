@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import { EXPENSE_CATEGORIES } from "./Expenses";
+import { EXPENSE_CATEGORIES } from "../constants/expenses";
 import "../styles/ProfitLoss.css";
 
 const LOCAL_STORAGE_KEY = "golden_crust_expenses";
