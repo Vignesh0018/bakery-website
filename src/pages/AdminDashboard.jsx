@@ -598,6 +598,259 @@ function AdminDashboard() {
             </div>
           </div>
 
+          {/* Visual Analytics & Operational Charts */}
+          <section className="admin-charts-section">
+            <div className="admin-charts-section-header">
+              <div className="admin-charts-title-group">
+                <h2>Bakery Operations & Sales Analytics</h2>
+                <span className="admin-charts-tag">Live Analytics</span>
+              </div>
+              <p className="admin-charts-subtext">
+                Real-time kitchen order velocity, revenue trends, and operational margin health.
+              </p>
+            </div>
+
+            <div className="admin-charts-grid">
+              {/* Chart 1: 7-Day Revenue Velocity */}
+              <div className="admin-chart-card">
+                <div className="admin-chart-header">
+                  <div>
+                    <h3 className="admin-chart-title">7-Day Sales Velocity</h3>
+                    <span className="admin-chart-subtitle">Daily revenue trend and order volume</span>
+                  </div>
+                  <div className="admin-chart-badge">
+                    Peak: ₹{Math.max(...dailySales.map((d) => d.revenue), 0).toLocaleString("en-IN")}
+                  </div>
+                </div>
+
+                <div className="admin-bars-chart">
+                  {dailySales.map((d) => {
+                    const maxRev = Math.max(...dailySales.map((x) => x.revenue), 1);
+                    const heightPct = Math.max((d.revenue / maxRev) * 100, 8);
+
+                    return (
+                      <div
+                        key={d.date}
+                        className="admin-bar-col"
+                        title={`${d.label} (${d.date}): ₹${d.revenue} (${d.ordersCount} orders)`}
+                      >
+                        <span className="admin-bar-amt">
+                          {d.revenue > 0
+                            ? `₹${d.revenue >= 1000 ? `${(d.revenue / 1000).toFixed(1)}k` : d.revenue}`
+                            : "—"}
+                        </span>
+                        <div className="admin-bar-track">
+                          <div
+                            className="admin-bar-fill"
+                            style={{
+                              height: `${heightPct}%`,
+                              background: d.revenue > 0 ? "#432719" : "#e6d5c5",
+                            }}
+                          />
+                        </div>
+                        <span className="admin-bar-label">{d.label}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Chart 2: Kitchen Order Pipeline */}
+              <div className="admin-chart-card">
+                <div className="admin-chart-header">
+                  <div>
+                    <h3 className="admin-chart-title">Kitchen Order Pipeline</h3>
+                    <span className="admin-chart-subtitle">Order status queue from oven to delivery</span>
+                  </div>
+                  <button
+                    type="button"
+                    className="admin-chart-action-btn"
+                    onClick={() => navigate("/admin/orders")}
+                  >
+                    View All Orders →
+                  </button>
+                </div>
+
+                {/* Multi-segment status bar */}
+                <div className="admin-pipeline-bar-wrapper">
+                  <div className="admin-pipeline-bar">
+                    {[
+                      { key: "Pending", color: "#e65100", label: "Pending" },
+                      { key: "Confirmed", color: "#1565c0", label: "Confirmed" },
+                      { key: "Preparing", color: "#7b1fa2", label: "Preparing" },
+                      { key: "Ready", color: "#fbc02d", label: "Ready" },
+                      { key: "Delivered", color: "#2e7d32", label: "Delivered" },
+                      { key: "Cancelled", color: "#9e9e9e", label: "Cancelled" },
+                    ].map((st) => {
+                      const count = orderPipeline[st.key] || 0;
+                      const pct = stats.totalOrders > 0 ? (count / stats.totalOrders) * 100 : 0;
+                      if (count === 0) return null;
+                      return (
+                        <div
+                          key={st.key}
+                          className="admin-pipeline-segment"
+                          style={{ width: `${pct}%`, background: st.color }}
+                          title={`${st.label}: ${count} (${pct.toFixed(0)}%)`}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Legend with counts */}
+                <div className="admin-pipeline-legend">
+                  {[
+                    { key: "Pending", color: "#e65100", label: "Pending" },
+                    { key: "Confirmed", color: "#1565c0", label: "Confirmed" },
+                    { key: "Preparing", color: "#7b1fa2", label: "In Kitchen" },
+                    { key: "Ready", color: "#fbc02d", label: "Ready" },
+                    { key: "Delivered", color: "#2e7d32", label: "Delivered" },
+                    { key: "Cancelled", color: "#9e9e9e", label: "Cancelled" },
+                  ].map((st) => (
+                    <div key={st.key} className="admin-legend-item">
+                      <span className="admin-legend-dot" style={{ background: st.color }} />
+                      <span className="admin-legend-text">{st.label}</span>
+                      <strong className="admin-legend-count">{orderPipeline[st.key] || 0}</strong>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Chart 3: Bakery Cash Flow & Margins */}
+              <div className="admin-chart-card">
+                <div className="admin-chart-header">
+                  <div>
+                    <h3 className="admin-chart-title">Cash Flow & Operating Margins</h3>
+                    <span className="admin-chart-subtitle">Gross sales vs operating burn vs net surplus</span>
+                  </div>
+                  <button
+                    type="button"
+                    className="admin-chart-action-btn"
+                    onClick={() => navigate("/admin/profit-loss")}
+                  >
+                    P&L Report →
+                  </button>
+                </div>
+
+                <div className="admin-cashflow-bars">
+                  <div className="admin-cashflow-row">
+                    <div className="admin-cf-header">
+                      <span>Gross Sales Revenue</span>
+                      <strong style={{ color: "#2e7d32" }}>
+                        ₹{stats.totalRevenue.toLocaleString("en-IN")}
+                      </strong>
+                    </div>
+                    <div className="admin-cf-bar-track">
+                      <div
+                        className="admin-cf-bar-fill"
+                        style={{ width: "100%", background: "#2e7d32" }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="admin-cashflow-row">
+                    <div className="admin-cf-header">
+                      <span>Operating Outflows (Expenses)</span>
+                      <strong style={{ color: "#c62828" }}>
+                        ₹{stats.totalExpenses.toLocaleString("en-IN")}
+                      </strong>
+                    </div>
+                    <div className="admin-cf-bar-track">
+                      <div
+                        className="admin-cf-bar-fill"
+                        style={{
+                          width: `${
+                            stats.totalRevenue > 0
+                              ? Math.min((stats.totalExpenses / stats.totalRevenue) * 100, 100)
+                              : 0
+                          }%`,
+                          background: "#c62828",
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="admin-cashflow-row">
+                    <div className="admin-cf-header">
+                      <span>Net Operating Profit</span>
+                      <strong style={{ color: stats.netProfit >= 0 ? "#1b5e20" : "#c62828" }}>
+                        ₹{stats.netProfit.toLocaleString("en-IN")}
+                      </strong>
+                    </div>
+                    <div className="admin-cf-bar-track">
+                      <div
+                        className="admin-cf-bar-fill"
+                        style={{
+                          width: `${
+                            stats.totalRevenue > 0
+                              ? Math.max(
+                                  Math.min((stats.netProfit / stats.totalRevenue) * 100, 100),
+                                  0
+                                )
+                              : 0
+                          }%`,
+                          background: stats.netProfit >= 0 ? "#1b5e20" : "#c62828",
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Chart 4: Menu Categories Breakdown */}
+              <div className="admin-chart-card">
+                <div className="admin-chart-header">
+                  <div>
+                    <h3 className="admin-chart-title">Menu Classification Share</h3>
+                    <span className="admin-chart-subtitle">
+                      Distribution of cakes, pastries, breads & cookies
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    className="admin-chart-action-btn"
+                    onClick={() => navigate("/admin/categories")}
+                  >
+                    Manage Categories →
+                  </button>
+                </div>
+
+                <div className="admin-category-bars-list">
+                  {Object.keys(categoryBreakdown).length === 0 ? (
+                    <p style={{ color: "#8a6b58", fontSize: "13px", margin: "15px 0" }}>
+                      No categorized products found. Add menu items in Products.
+                    </p>
+                  ) : (
+                    Object.entries(categoryBreakdown).map(([cat, count]) => {
+                      const totalProds = stats.totalProducts || 1;
+                      const pct = Math.round((count / totalProds) * 100);
+
+                      return (
+                        <div key={cat} className="admin-cat-bar-item">
+                          <div className="admin-cat-bar-header">
+                            <span className="admin-cat-name">{cat}</span>
+                            <span className="admin-cat-count">
+                              {count} items ({pct}%)
+                            </span>
+                          </div>
+                          <div className="admin-cf-bar-track">
+                            <div
+                              className="admin-cf-bar-fill"
+                              style={{
+                                width: `${pct}%`,
+                                background: "#8b5e3c",
+                              }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            </div>
+          </section>
+
           {/* Recent Orders Section */}
           <section className="admin-section">
             <div className="admin-section-header">
