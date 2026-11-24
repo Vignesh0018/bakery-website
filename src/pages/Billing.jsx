@@ -6,21 +6,6 @@ import "../styles/Billing.css";
 const HELD_BILLS_STORAGE_KEY = "golden_crust_held_bills";
 const BILLS_HISTORY_STORAGE_KEY = "golden_crust_billing_history";
 
-const BAKERY_DEFAULT_ITEMS = [
-  { id: "def-1", name: "Classic Chocolate Fudge Cake", price: 650, category: "CAKES", is_available: true },
-  { id: "def-2", name: "Red Velvet Cream Cheese Cake", price: 720, category: "CAKES", is_available: true },
-  { id: "def-3", name: "French Butter Croissant", price: 95, category: "PASTRIES", is_available: true },
-  { id: "def-4", name: "Pain au Chocolat", price: 120, category: "PASTRIES", is_available: true },
-  { id: "def-5", name: "Blueberry Glazed Danish", price: 130, category: "PASTRIES", is_available: true },
-  { id: "def-6", name: "Artisan Sourdough Boule", price: 180, category: "BREADS", is_available: true },
-  { id: "def-7", name: "Multigrain Seeded Loaf", price: 140, category: "BREADS", is_available: true },
-  { id: "def-8", name: "Triple Chocolate Chunk Cookie", price: 90, category: "COOKIES", is_available: true },
-  { id: "def-9", name: "Vanilla Butter Shortbread (Box)", price: 210, category: "COOKIES", is_available: true },
-  { id: "def-10", name: "Mushroom & Cheese Puff", price: 85, category: "SAVOURIES", is_available: true },
-  { id: "def-11", name: "Paneer Tikka Roll", price: 110, category: "SAVOURIES", is_available: true },
-  { id: "def-12", name: "Hot Cappuccino (Arabica)", price: 140, category: "BEVERAGES", is_available: true },
-];
-
 function generateInvoiceNumber() {
   const dateStr = new Date().toISOString().slice(2, 10).replace(/-/g, "");
   const randomSuffix = Math.floor(1000 + Math.random() * 9000);
@@ -32,8 +17,11 @@ function Billing() {
   const outletCtx = useOutletContext() || {};
   const adminEmail = outletCtx.adminEmail || "Bakery Admin";
 
+  // Data from database: products and categories
   const [products, setProducts] = useState([]);
+  const [dbCategories, setDbCategories] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
+  const [syncing, setSyncing] = useState(false);
   const [activeTab, setActiveTab] = useState("pos"); // 'pos' | 'register'
 
   // Search & category filter for catalog
@@ -62,53 +50,123 @@ function Billing() {
   const [errorBanner, setErrorBanner] = useState("");
   const [successBanner, setSuccessBanner] = useState("");
 
-  // Held Bills queue
+  // Held Bills queue (purges legacy mock items)
   const [heldBills, setHeldBills] = useState(() => {
     try {
       const stored = localStorage.getItem(HELD_BILLS_STORAGE_KEY);
-      return stored ? JSON.parse(stored) : [];
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          const cleaned = parsed.filter(
+            (b) => !b.cart?.some((i) => i.id?.startsWith("def-") || i.name === "Classic Chocolate Fudge Cake")
+          );
+          if (cleaned.length !== parsed.length) {
+            localStorage.setItem(HELD_BILLS_STORAGE_KEY, JSON.stringify(cleaned));
+          }
+          return cleaned;
+        }
+      }
+      return [];
     } catch {
       return [];
     }
   });
 
-  // Today's Billing History
+  // Today's Billing History (purges legacy mock items)
   const [billsHistory, setBillsHistory] = useState(() => {
     try {
       const stored = localStorage.getItem(BILLS_HISTORY_STORAGE_KEY);
-      return stored ? JSON.parse(stored) : [];
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          const cleaned = parsed.filter(
+            (b) => !b.items?.some((i) => i.id?.startsWith?.("def-") || i.product === "Classic Chocolate Fudge Cake")
+          );
+          if (cleaned.length !== parsed.length) {
+            localStorage.setItem(BILLS_HISTORY_STORAGE_KEY, JSON.stringify(cleaned));
+          }
+          return cleaned;
+        }
+      }
+      return [];
     } catch {
       return [];
     }
   });
 
-  // Fetch products
+  // Fetch actual products & categories from Supabase
+  const fetchCatalogAndCategories = async () => {
+    setSyncing(true);
+    setErrorBanner("");
+
+    try {
+      const [prodRes, catRes] = await Promise.all([
+        supabase
+          .from("products")
+          .select("*")
+          .order("name", { ascending: true }),
+        supabase
+          .from("categories")
+          .select("*")
+          .order("name", { ascending: true }),
+      ]);
+
+      if (prodRes.error) {
+        console.warn("Products sync notice:", prodRes.error.message);
+      }
+      if (catRes.error) {
+        console.warn("Categories sync notice:", catRes.error.message);
+      }
+
+      // Sync only real products present in database (filtered by availability)
+      const availableProds = (prodRes.data || []).filter((p) => p.is_available !== false);
+      setProducts(availableProds);
+      setDbCategories(catRes.data || []);
+      setSuccessBanner(`Catalog synced: ${availableProds.length} products, ${(catRes.data || []).length} categories.`);
+      setTimeout(() => setSuccessBanner(""), 3000);
+    } catch (err) {
+      console.error("Catalog sync error:", err);
+      setErrorBanner("Failed to sync catalog from database.");
+    } finally {
+      setSyncing(false);
+      setLoadingProducts(false);
+    }
+  };
+
+  // Initial load
   useEffect(() => {
     let ignore = false;
 
-    const fetchCatalog = async () => {
+    const loadInitial = async () => {
       try {
-        const { data, error } = await supabase
-          .from("products")
-          .select("*")
-          .order("name", { ascending: true });
+        const [prodRes, catRes] = await Promise.all([
+          supabase
+            .from("products")
+            .select("*")
+            .order("name", { ascending: true }),
+          supabase
+            .from("categories")
+            .select("*")
+            .order("name", { ascending: true }),
+        ]);
 
         if (!ignore) {
-          if (!error && data && data.length > 0) {
-            setProducts(data);
-          } else {
-            setProducts(BAKERY_DEFAULT_ITEMS);
-          }
+          const availableProds = (prodRes.data || []).filter((p) => p.is_available !== false);
+          setProducts(availableProds);
+          setDbCategories(catRes.data || []);
         }
       } catch (err) {
-        console.warn("Could not fetch products for POS, using defaults:", err);
-        if (!ignore) setProducts(BAKERY_DEFAULT_ITEMS);
+        console.warn("Initial catalog fetch notice:", err);
+        if (!ignore) {
+          setProducts([]);
+          setDbCategories([]);
+        }
       } finally {
         if (!ignore) setLoadingProducts(false);
       }
     };
 
-    fetchCatalog();
+    loadInitial();
 
     return () => {
       ignore = true;
@@ -135,14 +193,19 @@ function Billing() {
     }
   };
 
-  // Extract unique categories
+  // Extract categories directly from categories table & present products only
   const categories = useMemo(() => {
     const set = new Set();
-    products.forEach((p) => {
-      if (p.category) set.add(p.category.toUpperCase());
+    // 1. From categories table
+    dbCategories.forEach((c) => {
+      if (c.name) set.add(c.name.trim().toUpperCase());
     });
-    return Array.from(set);
-  }, [products]);
+    // 2. From actual products
+    products.forEach((p) => {
+      if (p.category) set.add(p.category.trim().toUpperCase());
+    });
+    return Array.from(set).sort();
+  }, [dbCategories, products]);
 
   // Filtered products for quick picker
   const filteredProducts = useMemo(() => {
@@ -411,7 +474,6 @@ function Billing() {
       }
     } catch (err) {
       console.error("Billing processing error:", err);
-      // Even if network fails, ensure bill is safely recorded in local register
       const offlineRecord = {
         ...billData,
         orderId: `LOCAL-${Date.now()}`,
@@ -439,7 +501,7 @@ function Billing() {
             <h1>Bakery Billing & POS Terminal</h1>
             <span className="billing-badge">Walk-In & Counter</span>
           </div>
-          <p>Instant cashier register, thermal invoices, split taxes, and walk-in sales logging.</p>
+          <p>Live synchronized counter register with your products and categories catalog.</p>
         </div>
 
         <div className="billing-header-actions">
@@ -495,7 +557,7 @@ function Billing() {
               <div className="billing-search-box">
                 <input
                   type="text"
-                  placeholder="🔍 Search items by name, cake, bread..."
+                  placeholder="🔍 Search items by name or category..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -503,6 +565,17 @@ function Billing() {
                   <button type="button" onClick={() => setSearchQuery("")}>✕</button>
                 )}
               </div>
+
+              {/* Sync Catalog Button */}
+              <button
+                type="button"
+                className="billing-btn billing-btn-secondary billing-btn-sync"
+                onClick={fetchCatalogAndCategories}
+                disabled={syncing}
+                title="Sync products and categories from database"
+              >
+                🔄 {syncing ? "Syncing..." : "Sync"}
+              </button>
 
               {/* Add Custom Item Button */}
               <button
@@ -515,35 +588,69 @@ function Billing() {
               </button>
             </div>
 
-            {/* Category Filter Pills */}
-            <div className="billing-category-pills">
-              <button
-                type="button"
-                className={`billing-cat-pill ${selectedCategory === "all" ? "active" : ""}`}
-                onClick={() => setSelectedCategory("all")}
-              >
-                All Items ({products.length})
-              </button>
-              {categories.map((cat) => (
+            {/* Category Filter Pills (synchronized with categories table) */}
+            {categories.length > 0 && (
+              <div className="billing-category-pills">
                 <button
-                  key={cat}
                   type="button"
-                  className={`billing-cat-pill ${selectedCategory === cat ? "active" : ""}`}
-                  onClick={() => setSelectedCategory(cat)}
+                  className={`billing-cat-pill ${selectedCategory === "all" ? "active" : ""}`}
+                  onClick={() => setSelectedCategory("all")}
                 >
-                  {cat}
+                  All Items ({products.length})
                 </button>
-              ))}
-            </div>
+                {categories.map((cat) => (
+                  <button
+                    key={cat}
+                    type="button"
+                    className={`billing-cat-pill ${selectedCategory === cat ? "active" : ""}`}
+                    onClick={() => setSelectedCategory(cat)}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            )}
 
-            {/* Product Cards Grid */}
+            {/* Product Cards Grid or Empty State */}
             {loadingProducts ? (
               <div className="billing-catalog-loading">
                 <span>⏳ Loading bakery catalog...</span>
               </div>
+            ) : products.length === 0 ? (
+              <div className="billing-catalog-empty-store">
+                <span className="billing-empty-store-icon">🧁</span>
+                <h3>Your Product Catalog is Empty</h3>
+                <p>
+                  No products found in your bakery catalog. Add your cakes, breads, pastries, and items in <strong>Products</strong> and <strong>Categories</strong> to begin counter billing.
+                </p>
+                <div className="billing-empty-store-actions">
+                  <button
+                    type="button"
+                    className="billing-btn billing-btn-primary"
+                    onClick={() => navigate("/admin/products")}
+                  >
+                    🍰 Manage Products
+                  </button>
+                  <button
+                    type="button"
+                    className="billing-btn billing-btn-secondary"
+                    onClick={() => navigate("/admin/categories")}
+                  >
+                    🏷️ Manage Categories
+                  </button>
+                  <button
+                    type="button"
+                    className="billing-btn billing-btn-secondary"
+                    onClick={fetchCatalogAndCategories}
+                    disabled={syncing}
+                  >
+                    🔄 {syncing ? "Syncing..." : "Sync Catalog"}
+                  </button>
+                </div>
+              </div>
             ) : filteredProducts.length === 0 ? (
               <div className="billing-catalog-empty">
-                <span>🔍 No items match your search.</span>
+                <span>🔍 No items match your search "{searchQuery}".</span>
                 <button
                   type="button"
                   className="billing-btn billing-btn-secondary"
@@ -571,7 +678,7 @@ function Billing() {
                       }}
                     >
                       <div className="billing-product-card-top">
-                        <span className="billing-product-cat-tag">{p.category || "Bakery"}</span>
+                        <span className="billing-product-cat-tag">{p.category || "General"}</span>
                         {inCartItem && (
                           <span className="billing-product-qty-badge">
                             ×{inCartItem.quantity}
@@ -677,7 +784,11 @@ function Billing() {
                 <div className="billing-cart-empty">
                   <span className="billing-cart-empty-icon">🧾</span>
                   <h4>Terminal Empty</h4>
-                  <p>Click any item on the menu catalog to start building customer bill.</p>
+                  <p>
+                    {products.length === 0
+                      ? "Use '+ Custom Item' above to bill custom items, or add products in Products management."
+                      : "Click any item on the menu catalog to start building customer bill."}
+                  </p>
                 </div>
               ) : (
                 <table className="billing-cart-table">
@@ -951,7 +1062,24 @@ function Billing() {
           </div>
 
           <div className="billing-register-table-wrapper">
-            <h3>Recent Counter Receipts</h3>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+              <h3 style={{ margin: 0 }}>Recent Counter Receipts</h3>
+              {billsHistory.length > 0 && (
+                <button
+                  type="button"
+                  className="billing-btn billing-btn-secondary"
+                  style={{ fontSize: "12px", padding: "6px 12px" }}
+                  onClick={() => {
+                    if (window.confirm("Clear today's counter receipts log?")) {
+                      saveBillsHistory([]);
+                    }
+                  }}
+                >
+                  Clear Register History
+                </button>
+              )}
+            </div>
+
             {billsHistory.length === 0 ? (
               <div className="billing-register-empty">
                 <p>No counter bills recorded today yet.</p>
@@ -1057,7 +1185,7 @@ function Billing() {
                 <label>Item Name / Description *</label>
                 <input
                   type="text"
-                  placeholder="e.g. 1kg Belgian Truffle Cake with Name Plaque"
+                  placeholder="e.g. 1kg Belgian Truffle Cake with Custom Message"
                   value={customItemForm.name}
                   onChange={(e) => setCustomItemForm({ ...customItemForm, name: e.target.value })}
                   required
