@@ -9,6 +9,9 @@
   color: #432719;
   box-sizing: border-box;
   font-family: Arial, sans-serif;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 /* --------------------------------------------------------------------------
