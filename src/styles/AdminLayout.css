@@ -1,0 +1,329 @@
+/* ==========================================================================
+   Admin Layout & Persistent Sidebar Styles - The Golden Crust Bakery
+   ========================================================================== */
+
+.admin-dashboard {
+  min-height: 100vh;
+  background: #fff8ef;
+  color: #432719;
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --------------------------------------------------------------------------
+   Top Sticky Header
+   -------------------------------------------------------------------------- */
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 3%;
+  background: #432719;
+  color: white;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.admin-header-brand-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-mobile-toggle {
+  display: none;
+  background: rgba(255, 248, 239, 0.15);
+  border: 1px solid rgba(255, 248, 239, 0.25);
+  color: #fff8ef;
+  font-size: 18px;
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-mobile-toggle:hover {
+  background: rgba(255, 248, 239, 0.3);
+}
+
+.admin-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.admin-header-logo {
+  font-size: 24px;
+}
+
+.admin-header-title {
+  font-size: 20px;
+  letter-spacing: 1.5px;
+  font-weight: 800;
+  margin: 0;
+  color: #fff8ef;
+}
+
+.admin-header-badge {
+  font-size: 11px;
+  background: rgba(255, 248, 239, 0.15);
+  padding: 3px 8px;
+  border-radius: 10px;
+  color: #f0e2d2;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+}
+
+.admin-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-header-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+}
+
+.admin-header-btn-ghost {
+  background: rgba(255, 248, 239, 0.12);
+  color: #fff8ef;
+  border: 1px solid rgba(255, 248, 239, 0.25);
+}
+
+.admin-header-btn-ghost:hover {
+  background: rgba(255, 248, 239, 0.25);
+  transform: translateY(-1px);
+}
+
+.admin-header-btn-logout {
+  background: #fdf5ec;
+  color: #432719;
+}
+
+.admin-header-btn-logout:hover {
+  background: #ffebee;
+  color: #c62828;
+  transform: translateY(-1px);
+}
+
+/* --------------------------------------------------------------------------
+   Layout: Persistent Sidebar + Main Content Area
+   -------------------------------------------------------------------------- */
+.admin-layout {
+  display: flex;
+  flex: 1;
+  min-height: calc(100vh - 63px);
+  position: relative;
+}
+
+/* --------------------------------------------------------------------------
+   Sidebar
+   -------------------------------------------------------------------------- */
+.admin-sidebar {
+  width: 250px;
+  flex-shrink: 0;
+  background: #f0e2d2;
+  border-right: 1px solid #ead9c8;
+  padding: 24px 14px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: sticky;
+  top: 63px;
+  height: calc(100vh - 63px);
+  overflow-y: auto;
+}
+
+.admin-sidebar-nav-title {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: #8a6b58;
+  margin-bottom: 14px;
+  padding-left: 10px;
+}
+
+.admin-sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.admin-sidebar-btn {
+  width: 100%;
+  padding: 11px 14px;
+  background: transparent;
+  color: #432719;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.admin-sidebar-btn:hover {
+  background: #e4d0bc;
+  transform: translateX(3px);
+}
+
+.admin-sidebar-btn.active {
+  background: #432719;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(67, 39, 25, 0.18);
+}
+
+.admin-sidebar-btn.active:hover {
+  transform: none;
+  background: #391f13;
+}
+
+.admin-sidebar-icon {
+  font-size: 18px;
+  width: 22px;
+  text-align: center;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.admin-sidebar-label {
+  flex: 1;
+  font-size: 14px;
+  letter-spacing: 0.2px;
+}
+
+.admin-sidebar-footer {
+  margin-top: 24px;
+  padding-top: 14px;
+  border-top: 1px solid #dfcbbb;
+  font-size: 11.5px;
+  color: #8a6b58;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-sidebar-user-info {
+  background: rgba(67, 39, 25, 0.08);
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  color: #432719;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-sidebar-user-email {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------------------
+   Main Content Area
+   -------------------------------------------------------------------------- */
+.admin-main {
+  flex: 1;
+  min-width: 0;
+  padding: 30px 4%;
+  box-sizing: border-box;
+  background: #fff8ef;
+  overflow-y: auto;
+}
+
+/* Child page resets so subpages fit seamlessly without double padding */
+.admin-main > div {
+  padding: 0 !important;
+  min-height: auto !important;
+  background: transparent !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive Mobile Drawer
+   -------------------------------------------------------------------------- */
+@media (max-width: 900px) {
+  .admin-mobile-toggle {
+    display: block;
+  }
+
+  .admin-sidebar-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 150;
+    backdrop-filter: blur(2px);
+  }
+
+  .admin-sidebar {
+    position: fixed;
+    top: 0;
+    left: -270px;
+    height: 100vh;
+    z-index: 200;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.2);
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 260px;
+  }
+
+  .admin-sidebar.mobile-open {
+    left: 0;
+  }
+
+  .admin-main {
+    padding: 20px 3%;
+  }
+
+  .admin-header {
+    padding: 12px 4%;
+  }
+
+  .admin-header-title {
+    font-size: 17px;
+  }
+}
+
+@media (max-width: 550px) {
+  .admin-header-badge {
+    display: none;
+  }
+
+  .admin-header-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+}
