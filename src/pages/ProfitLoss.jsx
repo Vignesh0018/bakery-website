@@ -263,8 +263,12 @@ function ProfitLoss() {
         <div className="profitloss-header-left">
           <div className="profitloss-title-row">
             <h1>Profit & Loss Statement</h1>
-            <span className={`profitloss-health-badge ${metrics.isProfitable ? "profitable" : "loss"}`}>
-              {metrics.isProfitable ? "● Net Profitable" : "● Operating at Loss"}
+            <span className={`profitloss-health-badge ${metrics.totalExpenses === 0 ? "zero-expenses" : metrics.isProfitable ? "profitable" : "loss"}`}>
+              {metrics.totalExpenses === 0
+                ? (metrics.totalRevenue > 0 ? "● Gross Sales (0 Expenses)" : "● No Data Yet")
+                : metrics.isProfitable
+                ? "● Net Profitable"
+                : "● Operating at Loss"}
             </span>
           </div>
           <p>
