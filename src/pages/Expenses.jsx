@@ -23,6 +23,7 @@ function Expenses() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isSqlModalOpen, setIsSqlModalOpen] = useState(false);
   const [isUsingLocalStorage, setIsUsingLocalStorage] = useState(false);
+  const [dismissedStorageBanner, setDismissedStorageBanner] = useState(false);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -543,13 +544,13 @@ function Expenses() {
       </div>
 
       {/* Storage Mode Notice */}
-      {isUsingLocalStorage && (
+      {isUsingLocalStorage && !dismissedStorageBanner && (
         <div className="expenses-storage-banner">
           <div className="expenses-storage-info">
             <span className="expenses-storage-icon">💾</span>
             <div>
-              <strong>Using Browser Storage:</strong> Your expenses are safely saved locally on this device.
-              To sync automatically to Supabase Cloud, run the 1-minute table setup script.
+              <strong>Using Browser Storage:</strong> Your expenses are currently saved locally in this browser.
+              To sync across devices with your Supabase database, run the 1-minute table setup script.
             </div>
           </div>
           <div className="expenses-storage-actions">
@@ -559,6 +560,14 @@ function Expenses() {
               onClick={() => setIsSqlModalOpen(true)}
             >
               📋 View Supabase SQL Setup
+            </button>
+            <button
+              type="button"
+              className="expenses-storage-close-btn"
+              onClick={() => setDismissedStorageBanner(true)}
+              title="Dismiss banner"
+            >
+              ✕
             </button>
           </div>
         </div>
