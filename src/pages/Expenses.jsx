@@ -54,12 +54,22 @@ function Expenses() {
     try {
       const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (stored) {
-        return JSON.parse(stored);
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          // Filter out any legacy auto-seeded sample data
+          const realExpenses = parsed.filter(
+            (item) => !item.id?.startsWith("sample-exp-")
+          );
+          if (realExpenses.length !== parsed.length) {
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(realExpenses));
+          }
+          return realExpenses;
+        }
       }
     } catch (e) {
       console.warn("Could not read local expenses:", e);
     }
-    return SAMPLE_EXPENSES;
+    return [];
   };
 
   // Save to local storage
@@ -89,7 +99,8 @@ function Expenses() {
         saveLocalExpenses(local);
       } else {
         setIsUsingLocalStorage(false);
-        setExpenses(data || []);
+        const dbItems = (data || []).filter((item) => !item.id?.startsWith?.("sample-exp-"));
+        setExpenses(dbItems);
       }
     } catch {
       setIsUsingLocalStorage(true);
@@ -118,7 +129,8 @@ function Expenses() {
             saveLocalExpenses(local);
           } else {
             setIsUsingLocalStorage(false);
-            setExpenses(data || []);
+            const dbItems = (data || []).filter((item) => !item.id?.startsWith?.("sample-exp-"));
+            setExpenses(dbItems);
           }
         }
       } catch {
