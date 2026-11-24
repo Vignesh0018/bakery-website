@@ -223,11 +223,6 @@ function AdminDashboard() {
     };
   }, [navigate]);
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate("/admin/login", { replace: true });
-  };
-
   // Time-based greeting helper
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -240,160 +235,23 @@ function AdminDashboard() {
     return (
       <div
         style={{
-          minHeight: "100vh",
+          minHeight: "400px",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#fff8ef",
           color: "#432719",
           fontFamily: "Arial, sans-serif",
         }}
       >
-        <h2>Verifying Administrator Access...</h2>
+        <h2>Verifying Administrator Access & Loading Metrics...</h2>
       </div>
     );
   }
 
   return (
-    <div className="admin-dashboard">
-      {/* Top Header */}
-      <header className="admin-header">
-        <div className="admin-header-brand">
-          <span className="admin-header-logo">🥖</span>
-          <h1 className="admin-header-title">THE GOLDEN CRUST</h1>
-          <span className="admin-header-badge">Admin Hub</span>
-        </div>
-
-        <div className="admin-header-actions">
-          <AdminNotifications />
-
-          <button
-            type="button"
-            className="admin-header-btn admin-header-btn-ghost"
-            onClick={() => navigate("/")}
-            title="Open customer website"
-          >
-            🌐 View Website
-          </button>
-
-          <button
-            type="button"
-            className="admin-header-btn admin-header-btn-logout"
-            onClick={handleLogout}
-          >
-            🚪 Logout
-          </button>
-        </div>
-      </header>
-
-      {/* Main Layout: Sidebar + Main Area */}
-      <div className="admin-layout">
-        {/* Sidebar */}
-        <aside className="admin-sidebar">
-          <div>
-            <div className="admin-sidebar-nav-title">Management</div>
-            <nav>
-              <button
-                type="button"
-                className="admin-sidebar-btn active"
-                onClick={() => navigate("/admin/dashboard")}
-              >
-                <span className="admin-sidebar-icon">📊</span>
-                Dashboard
-              </button>
-
-              <button
-                type="button"
-                className="admin-sidebar-btn"
-                onClick={() => navigate("/admin/products")}
-              >
-                <span className="admin-sidebar-icon">🍰</span>
-                Products
-              </button>
-
-              <button
-                type="button"
-                className="admin-sidebar-btn"
-                onClick={() => navigate("/admin/categories")}
-              >
-                <span className="admin-sidebar-icon">🏷️</span>
-                Categories
-              </button>
-
-              <button
-                type="button"
-                className="admin-sidebar-btn"
-                onClick={() => navigate("/admin/orders")}
-              >
-                <span className="admin-sidebar-icon">📦</span>
-                Orders
-              </button>
-
-              <button
-                type="button"
-                className="admin-sidebar-btn"
-                onClick={() => navigate("/admin/customers")}
-              >
-                <span className="admin-sidebar-icon">👥</span>
-                Customers
-              </button>
-
-              <button
-                type="button"
-                className="admin-sidebar-btn"
-                onClick={() => navigate("/admin/inventory")}
-              >
-                <span className="admin-sidebar-icon">🌾</span>
-                Inventory
-              </button>
-
-              <button
-                type="button"
-                className="admin-sidebar-btn"
-                onClick={() => navigate("/admin/expenses")}
-              >
-                <span className="admin-sidebar-icon">💸</span>
-                Expenses
-              </button>
-
-              <button
-                type="button"
-                className="admin-sidebar-btn"
-                onClick={() => navigate("/admin/profit-loss")}
-              >
-                <span className="admin-sidebar-icon">📈</span>
-                Profit & Loss
-              </button>
-
-              <button
-                type="button"
-                className="admin-sidebar-btn"
-                onClick={() => navigate("/admin/staff")}
-              >
-                <span className="admin-sidebar-icon">👨‍🍳</span>
-                Staff & Roster
-              </button>
-
-              <button
-                type="button"
-                className="admin-sidebar-btn"
-                onClick={() => navigate("/admin/notifications")}
-              >
-                <span className="admin-sidebar-icon">🔔</span>
-                Notifications
-              </button>
-            </nav>
-          </div>
-
-          <div className="admin-sidebar-footer">
-            <span>The Golden Crust Bakery v1.0</span>
-          </div>
-        </aside>
-
-        {/* Main Content Area */}
-        <main className="admin-main">
-          {/* Welcome Banner Box */}
-          <div className="admin-welcome-box">
+    <div className="admin-dashboard-page">
+      {/* Welcome Banner Box */}
+      <div className="admin-welcome-box">
             <div className="admin-welcome-text">
               <h2>
                 {getGreeting()}, Bakery Admin!
@@ -984,8 +842,6 @@ function AdminDashboard() {
               </div>
             </div>
           </section>
-        </main>
-      </div>
     </div>
   );
 }
