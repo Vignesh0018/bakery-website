@@ -146,7 +146,140 @@ function Notifications() {
   };
 
   useEffect(() => {
-    fetchAllAlerts();
+    let ignore = false;
+
+    const loadAlerts = async () => {
+      try {
+        const [ordersRes, invRes, prodRes, expRes] = await Promise.all([
+          supabase
+            .from("orders")
+            .select("id, customer_name, total_amount, order_status, created_at")
+            .order("created_at", { ascending: false })
+            .limit(40),
+          supabase.from("inventory").select("id, item_name, quantity, minimum_stock, unit"),
+          supabase.from("products").select("id, name, is_available").eq("is_available", false),
+          supabase.from("expenses").select("id, title, amount, category, expense_date").limit(20),
+        ]);
+
+        const items = [];
+
+        // 1. Pending Orders
+        const pendingOrders = (ordersRes.data || []).filter((o) => o.order_status === "Pending");
+        pendingOrders.forEach((o) => {
+          items.push({
+            id: `order-pending-${o.id}`,
+            category: "Orders",
+            priority: "Critical",
+            icon: "⏳",
+            title: `Pending Kitchen Order #${o.id}`,
+            message: `Customer: ${o.customer_name || "Guest"} • ₹${Number(o.total_amount).toLocaleString("en-IN")}. Awaiting kitchen confirmation.`,
+            date: o.created_at ? new Date(o.created_at).toLocaleDateString() : "Recent",
+            link: "/admin/orders",
+            actionText: "Open Order Ticket",
+          });
+        });
+
+        // 2. Confirmed / In Preparation Orders
+        const prepOrders = (ordersRes.data || []).filter(
+          (o) => o.order_status === "Preparing" || o.order_status === "Confirmed"
+        );
+        if (prepOrders.length > 0) {
+          items.push({
+            id: `kitchen-active-${prepOrders.length}`,
+            category: "Orders",
+            priority: "Info",
+            icon: "👨‍🍳",
+            title: `${prepOrders.length} Order${prepOrders.length > 1 ? "s" : ""} in Kitchen Preparation`,
+            message: "Kitchen deck active. Ensure baking timers and packaging are ready.",
+            date: "Today",
+            link: "/admin/orders",
+            actionText: "View Kitchen Queue",
+          });
+        }
+
+        // 3. Out of Stock Inventory
+        const outOfStock = (invRes.data || []).filter((i) => Number(i.quantity) <= 0);
+        outOfStock.forEach((i) => {
+          items.push({
+            id: `stock-depleted-${i.id}`,
+            category: "Inventory",
+            priority: "Critical",
+            icon: "🚫",
+            title: `Stock Depleted: ${i.item_name}`,
+            message: `Zero quantity left in bakery storage. Please log restock arrival immediately.`,
+            date: "Immediate Action Required",
+            link: "/admin/inventory",
+            actionText: "Update Stock Count",
+          });
+        });
+
+        // 4. Low Stock Inventory
+        const lowStock = (invRes.data || []).filter(
+          (i) => Number(i.quantity) > 0 && Number(i.quantity) <= Number(i.minimum_stock)
+        );
+        lowStock.forEach((i) => {
+          items.push({
+            id: `stock-low-${i.id}`,
+            category: "Inventory",
+            priority: "Warning",
+            icon: "⚠️",
+            title: `Low Stock: ${i.item_name}`,
+            message: `Currently ${i.quantity} ${i.unit} on hand (threshold: ${i.minimum_stock} ${i.unit}). Reorder recommended.`,
+            date: "Reorder Required",
+            link: "/admin/inventory",
+            actionText: "Reorder Ingredient",
+          });
+        });
+
+        // 5. Paused Products
+        const unavail = prodRes.data || [];
+        if (unavail.length > 0) {
+          items.push({
+            id: `prod-unavail-${unavail.length}`,
+            category: "Menu",
+            priority: "Info",
+            icon: "🍰",
+            title: `${unavail.length} Menu Creation${unavail.length > 1 ? "s" : ""} Currently Hidden`,
+            message: `Items marked unavailable: ${unavail.map((p) => p.name).slice(0, 3).join(", ")}${unavail.length > 3 ? "..." : ""}.`,
+            date: "Catalog Setting",
+            link: "/admin/products",
+            actionText: "Review Menu Items",
+          });
+        }
+
+        // 6. High single expenses
+        const highExpenses = (expRes.data || []).filter((e) => Number(e.amount) >= 15000);
+        highExpenses.forEach((e) => {
+          items.push({
+            id: `exp-high-${e.id}`,
+            category: "Finances",
+            priority: "Warning",
+            icon: "💸",
+            title: `High Operating Expense: ₹${Number(e.amount).toLocaleString("en-IN")}`,
+            message: `${e.title} (${e.category}). Review budget impact on P&L statement.`,
+            date: e.expense_date || "Recent",
+            link: "/admin/profit-loss",
+            actionText: "Review Financials",
+          });
+        });
+
+        if (!ignore) {
+          setAlerts(items);
+        }
+      } catch (err) {
+        console.warn("Notifications fetch error:", err);
+      } finally {
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadAlerts();
+
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   const handleMarkAllRead = () => {
