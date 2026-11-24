@@ -52,6 +52,8 @@ function App() {
         <Route path="/admin/inventory" element={<Inventory />} />
         <Route path="/admin/expenses" element={<Expenses />} />
         <Route path="/admin/profit-loss" element={<ProfitLoss />} />
+        <Route path="/admin/staff" element={<Staff />} />
+        <Route path="/admin/notifications" element={<Notifications />} />
       </Routes>
     </BrowserRouter>
   );
