@@ -343,6 +343,29 @@ function ProfitLoss() {
         </div>
       )}
 
+      {/* Informational banner when user has not added expenses */}
+      {metrics.totalExpenses === 0 && (
+        <div className="profitloss-empty-banner no-print">
+          <div className="profitloss-empty-left">
+            <span className="profitloss-empty-icon">💡</span>
+            <div className="profitloss-empty-info">
+              <h4>No Operating Expenses Recorded Yet</h4>
+              <p>
+                You haven't logged any ingredient costs, packaging, utilities, rent, or staff wages yet.
+                All customer order revenue currently reflects 100% gross margin without expense deductions.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="profitloss-btn profitloss-btn-primary"
+            onClick={() => navigate("/admin/expenses")}
+          >
+            + Add Operating Expenses
+          </button>
+        </div>
+      )}
+
       {/* Financial Executive Summary Cards */}
       <div className="profitloss-kpi-grid">
         {/* Gross Revenue */}
@@ -369,7 +392,9 @@ function ProfitLoss() {
             ₹{metrics.cogsTotal.toLocaleString("en-IN")}
           </p>
           <span className="profitloss-kpi-desc">
-            Raw ingredients & packaging supplies
+            {metrics.cogsTotal === 0
+              ? "No ingredient or packaging expenses recorded"
+              : "Raw ingredients & packaging supplies"}
           </span>
         </div>
 
@@ -383,7 +408,11 @@ function ProfitLoss() {
             ₹{metrics.grossProfit.toLocaleString("en-IN")}
           </p>
           <span className="profitloss-kpi-desc">
-            Gross Margin: <strong>{metrics.grossMarginPct}%</strong>
+            {metrics.cogsTotal === 0
+              ? "Gross Margin: 100.0% (Zero COGS deducted)"
+              : (
+                <>Gross Margin: <strong>{metrics.grossMarginPct}%</strong></>
+              )}
           </span>
         </div>
 
@@ -397,7 +426,9 @@ function ProfitLoss() {
             ₹{metrics.opexTotal.toLocaleString("en-IN")}
           </p>
           <span className="profitloss-kpi-desc">
-            Wages, utilities, rent & overheads
+            {metrics.opexTotal === 0
+              ? "No utilities, wages, or rent recorded"
+              : "Wages, utilities, rent & overheads"}
           </span>
         </div>
 
@@ -411,7 +442,11 @@ function ProfitLoss() {
             ₹{metrics.netProfit.toLocaleString("en-IN")}
           </p>
           <span className="profitloss-kpi-desc">
-            Net Margin: <strong>{metrics.netMarginPct}%</strong> ({metrics.isProfitable ? "Surplus" : "Deficit"})
+            {metrics.totalExpenses === 0 ? (
+              "Net Margin: 100.0% (Awaiting expense entries)"
+            ) : (
+              <>Net Margin: <strong>{metrics.netMarginPct}%</strong> ({metrics.isProfitable ? "Surplus" : "Deficit"})</>
+            )}
           </span>
         </div>
       </div>
