@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
+import AdminNotifications from "../components/AdminNotifications";
 import "../styles/AdminDashboard.css";
 
 function AdminDashboard() {
@@ -8,6 +9,17 @@ function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [adminEmail, setAdminEmail] = useState("");
   const [recentOrders, setRecentOrders] = useState([]);
+
+  const [orderPipeline, setOrderPipeline] = useState({
+    Pending: 0,
+    Confirmed: 0,
+    Preparing: 0,
+    Ready: 0,
+    Delivered: 0,
+    Cancelled: 0,
+  });
+  const [dailySales, setDailySales] = useState([]);
+  const [categoryBreakdown, setCategoryBreakdown] = useState({});
 
   const [stats, setStats] = useState({
     totalProducts: 0,
