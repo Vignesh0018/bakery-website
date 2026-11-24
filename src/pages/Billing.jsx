@@ -767,14 +767,25 @@ function Billing() {
                 />
               </div>
 
-              <div className="billing-customer-field small">
-                <label>Type</label>
-                <select value={orderType} onChange={(e) => setOrderType(e.target.value)}>
-                  <option value="Takeaway">Takeaway</option>
-                  <option value="Dine-in">Dine-in</option>
-                  <option value="Counter Pickup">Counter Pickup</option>
-                  <option value="Home Delivery">Delivery</option>
-                </select>
+              <div className="billing-customer-field full-width">
+                <label>Order Type</label>
+                <div className="billing-type-pills">
+                  {[
+                    { id: "Takeaway", label: "🥡 Takeaway" },
+                    { id: "Dine-in", label: "🍽️ Dine-in" },
+                    { id: "Counter Pickup", label: "🛍️ Pickup" },
+                    { id: "Home Delivery", label: "🛵 Delivery" },
+                  ].map((t) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      className={`billing-type-pill ${orderType === t.id ? "active" : ""}`}
+                      onClick={() => setOrderType(t.id)}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
