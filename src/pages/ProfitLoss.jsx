@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { EXPENSE_CATEGORIES } from "../constants/expenses";
@@ -117,122 +117,110 @@ function ProfitLoss() {
   }, []);
 
   // Filter orders and expenses based on selected timeframe
-  const filteredData = useMemo(() => {
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth();
-    const currentQuarter = Math.floor(currentMonth / 3);
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth();
+  const currentQuarter = Math.floor(currentMonth / 3);
 
-    const isMatch = (dateStr) => {
-      if (!dateStr) return false;
-      if (timeframe === "all") return true;
+  const isMatch = (dateStr) => {
+    if (!dateStr) return false;
+    if (timeframe === "all") return true;
 
-      const d = new Date(dateStr);
-      const dYear = d.getFullYear();
-      const dMonth = d.getMonth();
+    const d = new Date(dateStr);
+    const dYear = d.getFullYear();
+    const dMonth = d.getMonth();
 
-      if (timeframe === "this_month") {
-        return dYear === currentYear && dMonth === currentMonth;
-      }
+    if (timeframe === "this_month") {
+      return dYear === currentYear && dMonth === currentMonth;
+    }
 
-      if (timeframe === "last_month") {
-        const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
-        const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
-        return dYear === lastMonthYear && dMonth === lastMonth;
-      }
+    if (timeframe === "last_month") {
+      const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+      const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+      return dYear === lastMonthYear && dMonth === lastMonth;
+    }
 
-      if (timeframe === "this_quarter") {
-        const dQuarter = Math.floor(dMonth / 3);
-        return dYear === currentYear && dQuarter === currentQuarter;
-      }
+    if (timeframe === "this_quarter") {
+      const dQuarter = Math.floor(dMonth / 3);
+      return dYear === currentYear && dQuarter === currentQuarter;
+    }
 
-      if (timeframe === "this_year") {
-        return dYear === currentYear;
-      }
+    if (timeframe === "this_year") {
+      return dYear === currentYear;
+    }
 
-      return true;
-    };
+    return true;
+  };
 
-    const activeOrders = orders.filter((o) => isMatch(o.created_at) && o.order_status !== "Cancelled");
-    const activeExpenses = expenses.filter((e) => isMatch(e.expense_date || e.created_at));
+  const filteredOrders = orders.filter((o) => isMatch(o.created_at) && o.order_status !== "Cancelled");
+  const filteredExpenses = expenses.filter((e) => isMatch(e.expense_date || e.created_at));
 
-    return {
-      orders: activeOrders,
-      expenses: activeExpenses,
-    };
-  }, [orders, expenses, timeframe]);
+  // 1. Revenue
+  let deliveredRevenue = 0;
+  let pendingOrInPrepRevenue = 0;
+  let totalRevenue = 0;
 
-  // Financial Calculations
-  const metrics = useMemo(() => {
-    const { orders: filteredOrders, expenses: filteredExpenses } = filteredData;
+  filteredOrders.forEach((o) => {
+    const amt = Number(o.total_amount || 0);
+    totalRevenue += amt;
+    if (o.order_status === "Delivered") {
+      deliveredRevenue += amt;
+    } else {
+      pendingOrInPrepRevenue += amt;
+    }
+  });
 
-    // 1. Revenue
-    let deliveredRevenue = 0;
-    let pendingOrInPrepRevenue = 0;
-    let totalRevenue = 0;
+  // 2. Expenses breakdown by category
+  const catMap = {};
+  let cogsTotal = 0;
+  let opexTotal = 0;
+  let totalExpenses = 0;
 
-    filteredOrders.forEach((o) => {
-      const amt = Number(o.total_amount || 0);
-      totalRevenue += amt;
-      if (o.order_status === "Delivered") {
-        deliveredRevenue += amt;
-      } else {
-        pendingOrInPrepRevenue += amt;
-      }
-    });
+  filteredExpenses.forEach((exp) => {
+    const amt = Number(exp.amount || 0);
+    totalExpenses += amt;
+    catMap[exp.category] = (catMap[exp.category] || 0) + amt;
 
-    // 2. Expenses breakdown by category
-    const catMap = {};
-    let cogsTotal = 0;
-    let opexTotal = 0;
-    let totalExpenses = 0;
+    const catDef = EXPENSE_CATEGORIES.find((c) => c.name === exp.category);
+    if (catDef?.type === "COGS") {
+      cogsTotal += amt;
+    } else {
+      opexTotal += amt;
+    }
+  });
 
-    filteredExpenses.forEach((exp) => {
-      const amt = Number(exp.amount || 0);
-      totalExpenses += amt;
-      catMap[exp.category] = (catMap[exp.category] || 0) + amt;
+  // 3. Profit calculations
+  const grossProfit = totalRevenue - cogsTotal;
+  const grossMarginPct = totalRevenue > 0 ? ((grossProfit / totalRevenue) * 100).toFixed(1) : "0.0";
 
-      const catDef = EXPENSE_CATEGORIES.find((c) => c.name === exp.category);
-      if (catDef?.type === "COGS") {
-        cogsTotal += amt;
-      } else {
-        opexTotal += amt;
-      }
-    });
+  const netProfit = grossProfit - opexTotal;
+  const netMarginPct = totalRevenue > 0 ? ((netProfit / totalRevenue) * 100).toFixed(1) : "0.0";
 
-    // 3. Profit calculations
-    const grossProfit = totalRevenue - cogsTotal;
-    const grossMarginPct = totalRevenue > 0 ? ((grossProfit / totalRevenue) * 100).toFixed(1) : "0.0";
+  // 4. Key Financial Ratios
+  const foodCostRatio = totalRevenue > 0 ? (((catMap["Raw Ingredients"] || 0) / totalRevenue) * 100).toFixed(1) : "0.0";
+  const laborRatio = totalRevenue > 0 ? (((catMap["Staff & Wages"] || 0) / totalRevenue) * 100).toFixed(1) : "0.0";
+  const rentPowerRatio = totalRevenue > 0 ? ((((catMap["Rent & Kitchen Lease"] || 0) + (catMap["Utilities & Fuel"] || 0)) / totalRevenue) * 100).toFixed(1) : "0.0";
+  const opexRatio = totalRevenue > 0 ? ((opexTotal / totalRevenue) * 100).toFixed(1) : "0.0";
 
-    const netProfit = grossProfit - opexTotal;
-    const netMarginPct = totalRevenue > 0 ? ((netProfit / totalRevenue) * 100).toFixed(1) : "0.0";
-
-    // 4. Key Financial Ratios
-    const foodCostRatio = totalRevenue > 0 ? (((catMap["Raw Ingredients"] || 0) / totalRevenue) * 100).toFixed(1) : "0.0";
-    const laborRatio = totalRevenue > 0 ? (((catMap["Staff & Wages"] || 0) / totalRevenue) * 100).toFixed(1) : "0.0";
-    const rentPowerRatio = totalRevenue > 0 ? ((((catMap["Rent & Kitchen Lease"] || 0) + (catMap["Utilities & Fuel"] || 0)) / totalRevenue) * 100).toFixed(1) : "0.0";
-    const opexRatio = totalRevenue > 0 ? ((opexTotal / totalRevenue) * 100).toFixed(1) : "0.0";
-
-    return {
-      totalRevenue,
-      deliveredRevenue,
-      pendingOrInPrepRevenue,
-      totalOrdersCount: filteredOrders.length,
-      cogsTotal,
-      opexTotal,
-      totalExpenses,
-      grossProfit,
-      grossMarginPct,
-      netProfit,
-      netMarginPct,
-      catMap,
-      foodCostRatio,
-      laborRatio,
-      rentPowerRatio,
-      opexRatio,
-      isProfitable: netProfit >= 0,
-    };
-  }, [filteredData]);
+  const metrics = {
+    totalRevenue,
+    deliveredRevenue,
+    pendingOrInPrepRevenue,
+    totalOrdersCount: filteredOrders.length,
+    cogsTotal,
+    opexTotal,
+    totalExpenses,
+    grossProfit,
+    grossMarginPct,
+    netProfit,
+    netMarginPct,
+    catMap,
+    foodCostRatio,
+    laborRatio,
+    rentPowerRatio,
+    opexRatio,
+    isProfitable: netProfit >= 0,
+  };
 
   const handlePrint = () => {
     window.print();
