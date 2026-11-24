@@ -44,6 +44,7 @@ function AdminDashboard() {
         pendingResult,
         allOrdersResult,
         inventoryResult,
+        productsListResult,
         recentOrdersResult,
       ] = await Promise.all([
         supabase.from("products").select("*", { count: "exact", head: true }),
@@ -53,8 +54,9 @@ function AdminDashboard() {
           .from("orders")
           .select("*", { count: "exact", head: true })
           .eq("order_status", "Pending"),
-        supabase.from("orders").select("phone, total_amount, order_status"),
+        supabase.from("orders").select("phone, total_amount, order_status, created_at"),
         supabase.from("inventory").select("quantity, minimum_stock"),
+        supabase.from("products").select("category"),
         supabase
           .from("orders")
           .select("id, customer_name, phone, total_amount, order_status, created_at")
@@ -66,11 +68,59 @@ function AdminDashboard() {
         (allOrdersResult.data || []).map((order) => order.phone)
       );
 
-      // Revenue sum
+      // Revenue sum and pipeline computation
       let revenue = 0;
+      const pipeline = {
+        Pending: 0,
+        Confirmed: 0,
+        Preparing: 0,
+        Ready: 0,
+        Delivered: 0,
+        Cancelled: 0,
+      };
+
       (allOrdersResult.data || []).forEach((order) => {
         if (order.order_status !== "Cancelled") {
           revenue += Number(order.total_amount || 0);
+        }
+        if (pipeline[order.order_status] !== undefined) {
+          pipeline[order.order_status] += 1;
+        }
+      });
+      setOrderPipeline(pipeline);
+
+      // Compute last 7 days sales
+      const days = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(Date.now() - i * 86400000);
+        const dateStr = d.toISOString().split("T")[0];
+        const dayLabel = d.toLocaleDateString("en-US", { weekday: "short" });
+        days.push({
+          date: dateStr,
+          label: dayLabel,
+          revenue: 0,
+          ordersCount: 0,
+        });
+      }
+
+      (allOrdersResult.data || []).forEach((o) => {
+        if (o.order_status !== "Cancelled" && o.created_at) {
+          const oDate = o.created_at.split("T")[0];
+          const match = days.find((d) => d.date === oDate);
+          if (match) {
+            match.revenue += Number(o.total_amount || 0);
+            match.ordersCount += 1;
+          }
+        }
+      });
+      setDailySales(days);
+
+      // Product category breakdown
+      const catCount = {};
+      const prodsList = inventoryResult.data ? allOrdersResult.data : [];
+      (productsResult.data || []).forEach((p) => {
+        if (p.category) {
+          catCount[p.category] = (catCount[p.category] || 0) + 1;
         }
       });
 
