@@ -15,6 +15,8 @@ import Categories from "./pages/Categories";
 import Inventory from "./pages/Inventory";
 import Expenses from "./pages/Expenses";
 import ProfitLoss from "./pages/ProfitLoss";
+import Staff from "./pages/Staff";
+import Notifications from "./pages/Notifications";
 
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
