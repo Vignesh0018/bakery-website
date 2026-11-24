@@ -117,12 +117,12 @@ function AdminDashboard() {
 
       // Product category breakdown
       const catCount = {};
-      const prodsList = inventoryResult.data ? allOrdersResult.data : [];
-      (productsResult.data || []).forEach((p) => {
+      (productsListResult.data || []).forEach((p) => {
         if (p.category) {
           catCount[p.category] = (catCount[p.category] || 0) + 1;
         }
       });
+      setCategoryBreakdown(catCount);
 
       // Low stock count
       let lowCount = 0;
@@ -266,6 +266,8 @@ function AdminDashboard() {
         </div>
 
         <div className="admin-header-actions">
+          <AdminNotifications />
+
           <button
             type="button"
             className="admin-header-btn admin-header-btn-ghost"
