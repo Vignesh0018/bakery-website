@@ -365,6 +365,24 @@ function AdminDashboard() {
                 <span className="admin-sidebar-icon">📈</span>
                 Profit & Loss
               </button>
+
+              <button
+                type="button"
+                className="admin-sidebar-btn"
+                onClick={() => navigate("/admin/staff")}
+              >
+                <span className="admin-sidebar-icon">👨‍🍳</span>
+                Staff & Roster
+              </button>
+
+              <button
+                type="button"
+                className="admin-sidebar-btn"
+                onClick={() => navigate("/admin/notifications")}
+              >
+                <span className="admin-sidebar-icon">🔔</span>
+                Notifications
+              </button>
             </nav>
           </div>
 
