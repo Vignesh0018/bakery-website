@@ -22,7 +22,18 @@ function ProfitLoss() {
     try {
       const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (stored) {
-        return JSON.parse(stored);
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          // Filter out any legacy auto-seeded sample data that user did not add
+          const realExpenses = parsed.filter(
+            (item) => !item.id?.startsWith("sample-exp-")
+          );
+          // If stored contained sample data, clean it up from localStorage
+          if (realExpenses.length !== parsed.length) {
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(realExpenses));
+          }
+          return realExpenses;
+        }
       }
     } catch (e) {
       console.warn("Could not read local expenses:", e);
@@ -52,10 +63,18 @@ function ProfitLoss() {
       setOrders(ordersRes.data || []);
 
       if (expensesRes.error) {
-        // Fallback to local storage for expenses
+        // Fallback to real user local storage expenses
         setExpenses(getLocalExpenses());
       } else {
-        setExpenses(expensesRes.data && expensesRes.data.length > 0 ? expensesRes.data : getLocalExpenses());
+        const dbExpenses = (expensesRes.data || []).filter(
+          (item) => !item.id?.startsWith?.("sample-exp-")
+        );
+        if (dbExpenses.length > 0) {
+          setExpenses(dbExpenses);
+        } else {
+          // Table exists in Supabase but has 0 records; check local storage for real user expenses
+          setExpenses(getLocalExpenses());
+        }
       }
     } catch (err) {
       setError(err.message || "Failed to load financial records.");
@@ -90,11 +109,14 @@ function ProfitLoss() {
           if (expensesRes.error) {
             setExpenses(getLocalExpenses());
           } else {
-            setExpenses(
-              expensesRes.data && expensesRes.data.length > 0
-                ? expensesRes.data
-                : getLocalExpenses()
+            const dbExpenses = (expensesRes.data || []).filter(
+              (item) => !item.id?.startsWith?.("sample-exp-")
             );
+            if (dbExpenses.length > 0) {
+              setExpenses(dbExpenses);
+            } else {
+              setExpenses(getLocalExpenses());
+            }
           }
         }
       } catch (err) {
