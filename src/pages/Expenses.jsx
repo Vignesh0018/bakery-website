@@ -443,48 +443,45 @@ function Expenses() {
   });
 
   // Statistics computation
-  const stats = useMemo(() => {
-    let totalAll = 0;
-    let thisMonthTotal = 0;
-    const catSums = {};
-    const now = new Date();
-    const currYear = now.getFullYear();
-    const currMonth = now.getMonth();
+  let totalAll = 0;
+  let thisMonthTotal = 0;
+  const catSums = {};
+  const currYear = now.getFullYear();
+  const currMonth = now.getMonth();
 
-    expenses.forEach((item) => {
-      const amt = Number(item.amount || 0);
-      totalAll += amt;
+  expenses.forEach((item) => {
+    const amt = Number(item.amount || 0);
+    totalAll += amt;
 
-      const d = new Date(item.expense_date);
-      if (d.getFullYear() === currYear && d.getMonth() === currMonth) {
-        thisMonthTotal += amt;
-      }
+    const d = new Date(item.expense_date);
+    if (d.getFullYear() === currYear && d.getMonth() === currMonth) {
+      thisMonthTotal += amt;
+    }
 
-      if (item.category) {
-        catSums[item.category] = (catSums[item.category] || 0) + amt;
-      }
-    });
+    if (item.category) {
+      catSums[item.category] = (catSums[item.category] || 0) + amt;
+    }
+  });
 
-    let topCategory = "N/A";
-    let topCatAmount = 0;
-    Object.entries(catSums).forEach(([cat, sum]) => {
-      if (sum > topCatAmount) {
-        topCatAmount = sum;
-        topCategory = cat;
-      }
-    });
+  let topCategory = "N/A";
+  let topCatAmount = 0;
+  Object.entries(catSums).forEach(([cat, sum]) => {
+    if (sum > topCatAmount) {
+      topCatAmount = sum;
+      topCategory = cat;
+    }
+  });
 
-    const averageExpense = expenses.length > 0 ? Math.round(totalAll / expenses.length) : 0;
+  const averageExpense = expenses.length > 0 ? Math.round(totalAll / expenses.length) : 0;
 
-    return {
-      totalAll,
-      thisMonthTotal,
-      topCategory,
-      topCatAmount,
-      averageExpense,
-      count: expenses.length,
-    };
-  }, [expenses]);
+  const stats = {
+    totalAll,
+    thisMonthTotal,
+    topCategory,
+    topCatAmount,
+    averageExpense,
+    count: expenses.length,
+  };
 
   return (
     <div className="expenses-page">
