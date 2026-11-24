@@ -796,6 +796,16 @@ function AdminDashboard() {
             <div className="admin-actions-grid">
               <div
                 className="admin-action-card"
+                onClick={() => navigate("/admin/billing")}
+                style={{ borderLeft: "4px solid #2e7d32" }}
+              >
+                <span className="admin-action-icon">🧾</span>
+                <h3>Billing & POS</h3>
+                <p>Walk-in customer checkout, cash register & thermal receipts</p>
+              </div>
+
+              <div
+                className="admin-action-card"
                 onClick={() => navigate("/admin/products")}
               >
                 <span className="admin-action-icon">🍰</span>
