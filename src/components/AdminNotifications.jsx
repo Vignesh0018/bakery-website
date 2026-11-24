@@ -18,116 +18,123 @@ function AdminNotifications() {
 
   const dropdownRef = useRef(null);
 
-  // Fetch real-time alert data across orders and inventory
-  const fetchAlerts = async () => {
-    try {
-      const [ordersRes, invRes, prodRes] = await Promise.all([
-        supabase
-          .from("orders")
-          .select("id, customer_name, total_amount, order_status, created_at")
-          .order("created_at", { ascending: false })
-          .limit(25),
-        supabase.from("inventory").select("id, item_name, quantity, minimum_stock, unit"),
-        supabase.from("products").select("id, name, is_available").eq("is_available", false),
-      ]);
-
-      const newAlerts = [];
-
-      // 1. Pending Orders Alerts
-      const pendingOrders = (ordersRes.data || []).filter((o) => o.order_status === "Pending");
-      if (pendingOrders.length > 0) {
-        newAlerts.push({
-          id: `pending-orders-${pendingOrders.length}`,
-          category: "Orders",
-          type: "warning",
-          icon: "⏳",
-          title: `${pendingOrders.length} Pending Order${pendingOrders.length > 1 ? "s" : ""}`,
-          message: `Orders awaiting kitchen confirmation. Oldest: #${pendingOrders[0].id} (${pendingOrders[0].customer_name || "Guest"}).`,
-          link: "/admin/orders",
-          actionText: "Review Orders",
-          time: "Needs Action",
-        });
-      }
-
-      // 2. Recent New Orders (Placed within last 24 hours)
-      const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
-      const recentOrders = (ordersRes.data || []).filter(
-        (o) => new Date(o.created_at).getTime() > oneDayAgo
-      );
-      if (recentOrders.length > 0) {
-        newAlerts.push({
-          id: `recent-orders-${recentOrders.length}`,
-          category: "Orders",
-          type: "info",
-          icon: "🛎️",
-          title: `${recentOrders.length} Order${recentOrders.length > 1 ? "s" : ""} Today`,
-          message: `Total revenue: ₹${recentOrders.reduce((sum, o) => sum + Number(o.total_amount || 0), 0).toLocaleString("en-IN")}.`,
-          link: "/admin/orders",
-          actionText: "View Orders",
-          time: "Today",
-        });
-      }
-
-      // 3. Out of stock inventory
-      const outOfStock = (invRes.data || []).filter((i) => Number(i.quantity) <= 0);
-      outOfStock.forEach((item) => {
-        newAlerts.push({
-          id: `out-stock-${item.id}`,
-          category: "Inventory",
-          type: "critical",
-          icon: "🚫",
-          title: `Out of Stock: ${item.item_name}`,
-          message: `Depleted! Kitchen cannot bake items requiring ${item.item_name}.`,
-          link: "/admin/inventory",
-          actionText: "Restock Now",
-          time: "Urgent",
-        });
-      });
-
-      // 4. Low stock inventory
-      const lowStock = (invRes.data || []).filter(
-        (i) => Number(i.quantity) > 0 && Number(i.quantity) <= Number(i.minimum_stock)
-      );
-      lowStock.forEach((item) => {
-        newAlerts.push({
-          id: `low-stock-${item.id}`,
-          category: "Inventory",
-          type: "warning",
-          icon: "⚠️",
-          title: `Low Stock: ${item.item_name}`,
-          message: `Current: ${item.quantity} ${item.unit}. Minimum threshold: ${item.minimum_stock} ${item.unit}.`,
-          link: "/admin/inventory",
-          actionText: "Order Stock",
-          time: "Stock Warning",
-        });
-      });
-
-      // 5. Unavailable menu products
-      const unavail = prodRes.data || [];
-      if (unavail.length > 0) {
-        newAlerts.push({
-          id: `paused-products-${unavail.length}`,
-          category: "Products",
-          type: "info",
-          icon: "🍰",
-          title: `${unavail.length} Product${unavail.length > 1 ? "s" : ""} Paused`,
-          message: `Hidden from online customer menu (${unavail.map((p) => p.name).slice(0, 2).join(", ")}...).`,
-          link: "/admin/products",
-          actionText: "Manage Menu",
-          time: "Catalog",
-        });
-      }
-
-      setAlerts(newAlerts);
-    } catch (err) {
-      console.warn("Could not load notifications:", err);
-    }
-  };
-
   useEffect(() => {
-    fetchAlerts();
-    const interval = setInterval(fetchAlerts, 45000); // Check every 45s
-    return () => clearInterval(interval);
+    let ignore = false;
+
+    const loadAlerts = async () => {
+      try {
+        const [ordersRes, invRes, prodRes] = await Promise.all([
+          supabase
+            .from("orders")
+            .select("id, customer_name, total_amount, order_status, created_at")
+            .order("created_at", { ascending: false })
+            .limit(25),
+          supabase.from("inventory").select("id, item_name, quantity, minimum_stock, unit"),
+          supabase.from("products").select("id, name, is_available").eq("is_available", false),
+        ]);
+
+        const newAlerts = [];
+
+        // 1. Pending Orders Alerts
+        const pendingOrders = (ordersRes.data || []).filter((o) => o.order_status === "Pending");
+        if (pendingOrders.length > 0) {
+          newAlerts.push({
+            id: `pending-orders-${pendingOrders.length}`,
+            category: "Orders",
+            type: "warning",
+            icon: "⏳",
+            title: `${pendingOrders.length} Pending Order${pendingOrders.length > 1 ? "s" : ""}`,
+            message: `Orders awaiting kitchen confirmation. Oldest: #${pendingOrders[0].id} (${pendingOrders[0].customer_name || "Guest"}).`,
+            link: "/admin/orders",
+            actionText: "Review Orders",
+            time: "Needs Action",
+          });
+        }
+
+        // 2. Recent New Orders (Placed within last 24 hours)
+        const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
+        const recentOrders = (ordersRes.data || []).filter(
+          (o) => new Date(o.created_at).getTime() > oneDayAgo
+        );
+        if (recentOrders.length > 0) {
+          newAlerts.push({
+            id: `recent-orders-${recentOrders.length}`,
+            category: "Orders",
+            type: "info",
+            icon: "🛎️",
+            title: `${recentOrders.length} Order${recentOrders.length > 1 ? "s" : ""} Today`,
+            message: `Total revenue: ₹${recentOrders.reduce((sum, o) => sum + Number(o.total_amount || 0), 0).toLocaleString("en-IN")}.`,
+            link: "/admin/orders",
+            actionText: "View Orders",
+            time: "Today",
+          });
+        }
+
+        // 3. Out of stock inventory
+        const outOfStock = (invRes.data || []).filter((i) => Number(i.quantity) <= 0);
+        outOfStock.forEach((item) => {
+          newAlerts.push({
+            id: `out-stock-${item.id}`,
+            category: "Inventory",
+            type: "critical",
+            icon: "🚫",
+            title: `Out of Stock: ${item.item_name}`,
+            message: `Depleted! Kitchen cannot bake items requiring ${item.item_name}.`,
+            link: "/admin/inventory",
+            actionText: "Restock Now",
+            time: "Urgent",
+          });
+        });
+
+        // 4. Low stock inventory
+        const lowStock = (invRes.data || []).filter(
+          (i) => Number(i.quantity) > 0 && Number(i.quantity) <= Number(i.minimum_stock)
+        );
+        lowStock.forEach((item) => {
+          newAlerts.push({
+            id: `low-stock-${item.id}`,
+            category: "Inventory",
+            type: "warning",
+            icon: "⚠️",
+            title: `Low Stock: ${item.item_name}`,
+            message: `Current: ${item.quantity} ${item.unit}. Minimum threshold: ${item.minimum_stock} ${item.unit}.`,
+            link: "/admin/inventory",
+            actionText: "Order Stock",
+            time: "Stock Warning",
+          });
+        });
+
+        // 5. Unavailable menu products
+        const unavail = prodRes.data || [];
+        if (unavail.length > 0) {
+          newAlerts.push({
+            id: `paused-products-${unavail.length}`,
+            category: "Products",
+            type: "info",
+            icon: "🍰",
+            title: `${unavail.length} Product${unavail.length > 1 ? "s" : ""} Paused`,
+            message: `Hidden from online customer menu (${unavail.map((p) => p.name).slice(0, 2).join(", ")}...).`,
+            link: "/admin/products",
+            actionText: "Manage Menu",
+            time: "Catalog",
+          });
+        }
+
+        if (!ignore) {
+          setAlerts(newAlerts);
+        }
+      } catch (err) {
+        console.warn("Could not load notifications:", err);
+      }
+    };
+
+    loadAlerts();
+    const interval = setInterval(loadAlerts, 45000); // Check every 45s
+
+    return () => {
+      ignore = true;
+      clearInterval(interval);
+    };
   }, []);
 
   // Close dropdown on outside click
