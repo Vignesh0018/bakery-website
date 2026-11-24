@@ -1,0 +1,1335 @@
+/* ==========================================================================
+   Admin Billing & POS Terminal Styles - The Golden Crust Bakery
+   ========================================================================== */
+
+.billing-page {
+  min-height: 100vh;
+  padding: 30px 4%;
+  background: #fff8ef;
+  color: #432719;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+/* --------------------------------------------------------------------------
+   Header
+   -------------------------------------------------------------------------- */
+.billing-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.billing-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.billing-title-row h1 {
+  font-size: 28px;
+  margin: 0;
+  color: #432719;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.billing-badge {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 4px 10px;
+  border-radius: 14px;
+  background: #f0e2d2;
+  color: #432719;
+  border: 1px solid #d8c5b5;
+}
+
+.billing-header-left p {
+  color: #8a6b58;
+  margin: 0;
+  font-size: 14px;
+}
+
+.billing-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.billing-tab-pills {
+  display: flex;
+  background: #f0e2d2;
+  padding: 4px;
+  border-radius: 10px;
+  gap: 4px;
+}
+
+.billing-tab-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: #432719;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.billing-tab-btn:hover {
+  background: rgba(67, 39, 25, 0.08);
+}
+
+.billing-tab-btn.active {
+  background: #432719;
+  color: #fff8ef;
+  box-shadow: 0 2px 8px rgba(67, 39, 25, 0.15);
+}
+
+.billing-btn {
+  padding: 9px 16px;
+  border-radius: 8px;
+  border: none;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+}
+
+.billing-btn-primary {
+  background: #432719;
+  color: #fff8ef;
+}
+
+.billing-btn-primary:hover {
+  background: #6d4229;
+}
+
+.billing-btn-secondary {
+  background: #f0e2d2;
+  color: #432719;
+  border: 1px solid #d8c5b5;
+}
+
+.billing-btn-secondary:hover {
+  background: #dfc7af;
+}
+
+.billing-btn-custom-item {
+  background: #fff8ef;
+  color: #432719;
+  border: 1px solid #8b5e3c;
+  font-size: 13px;
+  padding: 8px 14px;
+}
+
+.billing-btn-custom-item:hover {
+  background: #8b5e3c;
+  color: #fff8ef;
+}
+
+/* --------------------------------------------------------------------------
+   Notification Banners
+   -------------------------------------------------------------------------- */
+.billing-banner {
+  padding: 12px 18px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  font-size: 13.5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.billing-banner-error {
+  background: #ffebee;
+  color: #c62828;
+  border: 1px solid #ffcdd2;
+}
+
+.billing-banner-success {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #c8e6c9;
+}
+
+.billing-banner button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: inherit;
+}
+
+/* --------------------------------------------------------------------------
+   POS Split Container: Catalog (Left) + Terminal (Right)
+   -------------------------------------------------------------------------- */
+.billing-pos-container {
+  display: grid;
+  grid-template-columns: 58% 42%;
+  gap: 24px;
+  align-items: start;
+}
+
+/* --------------------------------------------------------------------------
+   Left: Product Catalog & Picker
+   -------------------------------------------------------------------------- */
+.billing-catalog-section {
+  background: #ffffff;
+  border: 1px solid #ead9c8;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(67, 39, 25, 0.04);
+}
+
+.billing-catalog-toolbar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 14px;
+  align-items: center;
+}
+
+.billing-search-box {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.billing-search-box input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #ead9c8;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #fdfbf9;
+  box-sizing: border-box;
+}
+
+.billing-search-box input:focus {
+  outline: none;
+  border-color: #8b5e3c;
+  background: #ffffff;
+}
+
+.billing-search-box button {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #8a6b58;
+}
+
+.billing-category-pills {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  margin-bottom: 16px;
+  scrollbar-width: thin;
+}
+
+.billing-cat-pill {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid #ead9c8;
+  background: #fdfbf9;
+  color: #432719;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.billing-cat-pill:hover {
+  background: #f0e2d2;
+}
+
+.billing-cat-pill.active {
+  background: #432719;
+  color: #fff8ef;
+  border-color: #432719;
+}
+
+.billing-products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 14px;
+  max-height: calc(100vh - 280px);
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.billing-product-card {
+  background: #ffffff;
+  border: 1px solid #ead9c8;
+  border-radius: 12px;
+  padding: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-sizing: border-box;
+  min-height: 120px;
+  user-select: none;
+}
+
+.billing-product-card:hover {
+  border-color: #8b5e3c;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(67, 39, 25, 0.08);
+}
+
+.billing-product-card.in-cart {
+  border-color: #432719;
+  background: #fdfbf7;
+}
+
+.billing-product-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.billing-product-cat-tag {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #8a6b58;
+  letter-spacing: 0.5px;
+}
+
+.billing-product-qty-badge {
+  background: #432719;
+  color: #fff8ef;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 10px;
+}
+
+.billing-product-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #432719;
+  margin: 0 0 10px 0;
+  line-height: 1.3;
+}
+
+.billing-product-card-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+}
+
+.billing-product-price {
+  font-size: 15px;
+  font-weight: 800;
+  color: #2e7d32;
+}
+
+.billing-product-add-btn {
+  background: #f0e2d2;
+  border: 1px solid #d8c5b5;
+  color: #432719;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.billing-product-add-btn:hover {
+  background: #432719;
+  color: #fff8ef;
+  border-color: #432719;
+}
+
+/* --------------------------------------------------------------------------
+   Right: POS Terminal / Bill Summary
+   -------------------------------------------------------------------------- */
+.billing-terminal-section {
+  background: #ffffff;
+  border: 1px solid #ead9c8;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 18px rgba(67, 39, 25, 0.05);
+  display: flex;
+  flex-direction: column;
+}
+
+.billing-terminal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ead9c8;
+}
+
+.billing-terminal-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.billing-terminal-title h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #432719;
+  font-weight: 800;
+}
+
+.billing-items-count {
+  font-size: 12.5px;
+  color: #8a6b58;
+}
+
+.billing-terminal-quick-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.billing-held-badge {
+  background: #fff3e0;
+  color: #e65100;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid #ffe0b2;
+}
+
+.billing-btn-tiny {
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid #d8c5b5;
+  background: #f0e2d2;
+  color: #432719;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.billing-btn-tiny:hover {
+  background: #dfc7af;
+}
+
+.billing-btn-tiny-danger {
+  background: #ffebee;
+  color: #c62828;
+  border-color: #ffcdd2;
+}
+
+.billing-btn-tiny-danger:hover {
+  background: #ffcdd2;
+}
+
+/* Customer Fields Bar */
+.billing-customer-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr 100px;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.billing-customer-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.billing-customer-field label {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #8a6b58;
+  letter-spacing: 0.5px;
+}
+
+.billing-customer-field input,
+.billing-customer-field select {
+  padding: 7px 10px;
+  border: 1px solid #ead9c8;
+  border-radius: 6px;
+  font-size: 12.5px;
+  background: #fdfbf9;
+  box-sizing: border-box;
+}
+
+.billing-customer-field input:focus,
+.billing-customer-field select:focus {
+  outline: none;
+  border-color: #8b5e3c;
+  background: #ffffff;
+}
+
+/* Cart Table */
+.billing-cart-table-wrapper {
+  min-height: 180px;
+  max-height: 250px;
+  overflow-y: auto;
+  border: 1px solid #f0e2d2;
+  border-radius: 10px;
+  background: #fdfbf9;
+  margin-bottom: 14px;
+}
+
+.billing-cart-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: #8a6b58;
+}
+
+.billing-cart-empty-icon {
+  font-size: 34px;
+  margin-bottom: 8px;
+}
+
+.billing-cart-empty h4 {
+  margin: 0 0 4px 0;
+  font-size: 15px;
+  color: #432719;
+}
+
+.billing-cart-empty p {
+  margin: 0;
+  font-size: 12px;
+}
+
+.billing-cart-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.billing-cart-table th {
+  background: #f5ebe1;
+  color: #5c3a26;
+  font-weight: 700;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  padding: 8px 10px;
+  border-bottom: 1px solid #ead9c8;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.billing-cart-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #f0e2d2;
+  vertical-align: middle;
+}
+
+.billing-item-name {
+  font-weight: 700;
+  color: #432719;
+}
+
+.billing-item-unit-rate {
+  font-size: 11px;
+  color: #8a6b58;
+}
+
+.billing-qty-stepper {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #d8c5b5;
+  border-radius: 6px;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.billing-stepper-btn {
+  background: #f0e2d2;
+  border: none;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 14px;
+  color: #432719;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.billing-stepper-btn:hover {
+  background: #dfc7af;
+}
+
+.billing-qty-input {
+  width: 32px;
+  text-align: center;
+  border: none;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 2px 0;
+}
+
+.billing-qty-input:focus {
+  outline: none;
+}
+
+.billing-remove-btn {
+  background: none;
+  border: none;
+  color: #b71c1c;
+  cursor: pointer;
+  font-size: 13px;
+  opacity: 0.6;
+}
+
+.billing-remove-btn:hover {
+  opacity: 1;
+}
+
+/* Footer Section: Discounts, Taxes, Totals */
+.billing-footer-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.billing-discounts-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f0e2d2;
+}
+
+.billing-discount-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.billing-ctrl-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #8a6b58;
+}
+
+.billing-discount-input {
+  width: 60px;
+  padding: 5px 8px;
+  border: 1px solid #ead9c8;
+  border-radius: 6px;
+  font-size: 12.5px;
+  box-sizing: border-box;
+}
+
+.billing-discount-select {
+  padding: 5px 6px;
+  border: 1px solid #ead9c8;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.billing-gst-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #432719;
+  cursor: pointer;
+}
+
+/* Totals Box */
+.billing-totals-box {
+  background: #fdfaf6;
+  border: 1px solid #ead9c8;
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.billing-total-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #6d4c38;
+}
+
+.billing-total-line.discount {
+  color: #c62828;
+}
+
+.billing-total-line.tax {
+  font-size: 12px;
+  color: #795548;
+}
+
+.billing-total-line.roundoff {
+  font-size: 11.5px;
+  color: #8a6b58;
+}
+
+.billing-grand-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 2px dashed #d8c5b5;
+  font-size: 15px;
+  font-weight: 800;
+  color: #432719;
+}
+
+.billing-grand-amount {
+  font-size: 24px;
+  font-weight: 800;
+  color: #2e7d32;
+}
+
+/* Payment Modes */
+.billing-payment-modes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.billing-pay-pill {
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 1px solid #ead9c8;
+  background: #fdfbf9;
+  font-size: 13px;
+  font-weight: 700;
+  color: #432719;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.billing-pay-pill.active {
+  background: #432719;
+  color: #fff8ef;
+  border-color: #432719;
+}
+
+/* Cash Tender Box */
+.billing-cash-tender-box {
+  background: #f5ebe1;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #ead9c8;
+}
+
+.billing-tender-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.billing-tender-field label {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #8a6b58;
+  margin-bottom: 3px;
+}
+
+.billing-tender-field input {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #d8c5b5;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  box-sizing: border-box;
+}
+
+.billing-change-display {
+  padding: 6px 10px;
+  background: #ffffff;
+  border: 1px solid #d8c5b5;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 800;
+  color: #8a6b58;
+  min-height: 31px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+}
+
+.billing-change-display.has-change {
+  color: #b71c1c;
+  background: #ffebee;
+  border-color: #ffcdd2;
+}
+
+.billing-quick-cash-pills {
+  display: flex;
+  gap: 6px;
+}
+
+.billing-quick-cash-pills button {
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid #d8c5b5;
+  background: #ffffff;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #432719;
+  cursor: pointer;
+}
+
+.billing-quick-cash-pills button:hover {
+  background: #432719;
+  color: #fff8ef;
+}
+
+.billing-notes-input {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid #ead9c8;
+  border-radius: 6px;
+  font-size: 12.5px;
+  box-sizing: border-box;
+}
+
+/* Primary Action Buttons */
+.billing-checkout-actions {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.billing-checkout-btn {
+  padding: 13px 18px;
+  border-radius: 10px;
+  border: none;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.billing-checkout-btn.print {
+  background: #2e7d32;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(46, 125, 50, 0.25);
+}
+
+.billing-checkout-btn.print:hover:not(:disabled) {
+  background: #1b5e20;
+  transform: translateY(-2px);
+}
+
+.billing-checkout-btn.save {
+  background: #432719;
+  color: #fff8ef;
+}
+
+.billing-checkout-btn.save:hover:not(:disabled) {
+  background: #6d4229;
+}
+
+.billing-checkout-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* --------------------------------------------------------------------------
+   Held Bills Drawer
+   -------------------------------------------------------------------------- */
+.billing-held-bar {
+  margin-top: 24px;
+  background: #ffffff;
+  border: 1px solid #ffe0b2;
+  border-radius: 12px;
+  padding: 14px 18px;
+  box-shadow: 0 3px 10px rgba(230, 81, 0, 0.06);
+}
+
+.billing-held-header {
+  font-size: 13px;
+  font-weight: 800;
+  color: #e65100;
+  margin-bottom: 10px;
+}
+
+.billing-held-list {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+}
+
+.billing-held-card {
+  background: #fffdfb;
+  border: 1px solid #ead9c8;
+  padding: 8px 12px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 200px;
+}
+
+.held-info {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+}
+
+.held-info strong {
+  color: #432719;
+}
+
+.held-info span {
+  color: #8a6b58;
+}
+
+.held-actions {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+/* --------------------------------------------------------------------------
+   TAB 2: Daily Sales Register
+   -------------------------------------------------------------------------- */
+.billing-register-section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.billing-register-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.billing-register-stat {
+  background: #ffffff;
+  border: 1px solid #ead9c8;
+  border-radius: 14px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stat-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #8a6b58;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  font-size: 26px;
+  font-weight: 800;
+  color: #432719;
+}
+
+.billing-register-table-wrapper {
+  background: #ffffff;
+  border: 1px solid #ead9c8;
+  border-radius: 16px;
+  padding: 22px;
+  box-shadow: 0 4px 15px rgba(67, 39, 25, 0.04);
+}
+
+.billing-register-table-wrapper h3 {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  color: #432719;
+  font-weight: 800;
+}
+
+.billing-register-empty {
+  padding: 30px;
+  text-align: center;
+  color: #8a6b58;
+}
+
+.billing-register-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+
+.billing-register-table th {
+  background: #f5ebe1;
+  color: #5c3a26;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 10px 14px;
+  border-bottom: 1px solid #ead9c8;
+  text-align: left;
+}
+
+.billing-register-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #f0e2d2;
+}
+
+.invoice-cell strong {
+  font-family: monospace;
+  font-size: 13.5px;
+  color: #432719;
+}
+
+.phone-sub {
+  font-size: 11px;
+  color: #8a6b58;
+}
+
+.billing-payment-tag {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.billing-payment-tag.cash {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.billing-payment-tag.upiqr {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.billing-payment-tag.card {
+  background: #ede7f6;
+  color: #512da8;
+}
+
+.billing-reprint-btn {
+  background: #f0e2d2;
+  border: 1px solid #d8c5b5;
+  color: #432719;
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.billing-reprint-btn:hover {
+  background: #432719;
+  color: #fff8ef;
+}
+
+/* --------------------------------------------------------------------------
+   Modal: Custom Item Dialog
+   -------------------------------------------------------------------------- */
+.billing-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+  backdrop-filter: blur(2px);
+}
+
+.billing-modal-box {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  width: 90%;
+  max-width: 440px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.billing-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.billing-modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #432719;
+}
+
+.billing-modal-header button {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #8a6b58;
+}
+
+.billing-custom-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.billing-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.billing-form-field label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #5c3a26;
+}
+
+.billing-form-field input {
+  padding: 9px 12px;
+  border: 1px solid #ead9c8;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.billing-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+/* --------------------------------------------------------------------------
+   Modal: Authentic Thermal Receipt
+   -------------------------------------------------------------------------- */
+.receipt-backdrop {
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.billing-receipt-modal-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.billing-receipt-actions-bar {
+  display: flex;
+  gap: 10px;
+}
+
+.billing-thermal-receipt {
+  background: #ffffff;
+  color: #111111;
+  width: 320px;
+  padding: 24px 20px;
+  border-radius: 4px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 12px;
+  line-height: 1.35;
+  box-sizing: border-box;
+}
+
+.receipt-header {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.receipt-logo {
+  font-size: 26px;
+  margin-bottom: 2px;
+}
+
+.receipt-store-name {
+  font-size: 18px;
+  font-weight: 900;
+  margin: 0 0 4px 0;
+  letter-spacing: 1px;
+}
+
+.receipt-store-tagline {
+  margin: 0 0 4px 0;
+  font-size: 11px;
+}
+
+.receipt-store-address {
+  margin: 0;
+  font-size: 10px;
+  color: #444444;
+}
+
+.receipt-divider {
+  text-align: center;
+  font-size: 10px;
+  margin: 6px 0;
+  color: #555555;
+  letter-spacing: -1px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.receipt-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 11px;
+}
+
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.receipt-items-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  margin: 4px 0;
+}
+
+.receipt-items-table th {
+  padding: 4px 0;
+  border-bottom: 1px solid #111111;
+}
+
+.receipt-items-table td {
+  padding: 4px 0;
+}
+
+.item-name-cell {
+  word-break: break-word;
+  padding-right: 6px;
+  font-weight: 700;
+}
+
+.receipt-totals {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 11px;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.total-row.grand {
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.grand-val {
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.receipt-notes {
+  margin-top: 8px;
+  padding: 6px;
+  border: 1px dashed #777;
+  font-size: 10px;
+}
+
+.receipt-footer {
+  text-align: center;
+  margin-top: 14px;
+  font-size: 10.5px;
+}
+
+.receipt-footer p {
+  margin: 2px 0;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive Layout
+   -------------------------------------------------------------------------- */
+@media (max-width: 1024px) {
+  .billing-pos-container {
+    grid-template-columns: 1fr;
+  }
+
+  .billing-products-grid {
+    max-height: 400px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   PRINT STYLESHEET: Pristine Receipt Output
+   -------------------------------------------------------------------------- */
+@media print {
+  /* Hide the rest of the application */
+  body * {
+    visibility: hidden;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  /* Show only the receipt */
+  #printable-receipt,
+  #printable-receipt * {
+    visibility: visible;
+  }
+
+  .billing-modal-backdrop.receipt-backdrop {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: auto;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+  }
+
+  .billing-thermal-receipt {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 78mm !important;
+    max-width: 78mm !important;
+    padding: 0 4mm !important;
+    box-shadow: none !important;
+    border: none !important;
+    margin: 0 !important;
+  }
+}
