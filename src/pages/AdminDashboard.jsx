@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import AdminNotifications from "../components/AdminNotifications";
 import "../styles/AdminDashboard.css";
 
 function AdminDashboard() {
