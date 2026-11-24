@@ -12,6 +12,7 @@ import Footer from "./components/Footer";
 import AdminLayout from "./layouts/AdminLayout";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
+import Billing from "./pages/Billing";
 import Products from "./pages/Products";
 import Orders from "./pages/Orders";
 import Categories from "./pages/Categories";
