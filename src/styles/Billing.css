@@ -502,19 +502,28 @@
 /* Customer Fields Bar */
 .billing-customer-bar {
   display: grid;
-  grid-template-columns: 1fr 1fr 100px;
-  gap: 8px;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
   margin-bottom: 14px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .billing-customer-field {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.billing-customer-field.full-width {
+  grid-column: 1 / -1;
 }
 
 .billing-customer-field label {
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
   color: #8a6b58;
@@ -523,12 +532,16 @@
 
 .billing-customer-field input,
 .billing-customer-field select {
-  padding: 7px 10px;
+  width: 100%;
+  min-width: 0;
+  padding: 8px 12px;
   border: 1px solid #ead9c8;
-  border-radius: 6px;
-  font-size: 12.5px;
+  border-radius: 8px;
+  font-size: 13px;
   background: #fdfbf9;
   box-sizing: border-box;
+  color: #432719;
+  transition: border-color 0.2s;
 }
 
 .billing-customer-field input:focus,
@@ -536,6 +549,42 @@
   outline: none;
   border-color: #8b5e3c;
   background: #ffffff;
+}
+
+.billing-type-pills {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.billing-type-pill {
+  padding: 7px 6px;
+  border-radius: 8px;
+  border: 1px solid #ead9c8;
+  background: #fdfbf9;
+  color: #432719;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.billing-type-pill:hover {
+  background: #f0e2d2;
+}
+
+.billing-type-pill.active {
+  background: #432719;
+  color: #fff8ef;
+  border-color: #432719;
+  box-shadow: 0 2px 6px rgba(67, 39, 25, 0.15);
 }
 
 /* Cart Table */
@@ -1335,13 +1384,31 @@
 /* --------------------------------------------------------------------------
    Responsive Layout
    -------------------------------------------------------------------------- */
-@media (max-width: 1024px) {
+@media (max-width: 1180px) {
   .billing-pos-container {
     grid-template-columns: 1fr;
   }
 
   .billing-products-grid {
     max-height: 400px;
+  }
+}
+
+@media (max-width: 600px) {
+  .billing-customer-bar {
+    grid-template-columns: 1fr;
+  }
+
+  .billing-type-pills {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .billing-tender-inputs {
+    grid-template-columns: 1fr;
+  }
+
+  .billing-checkout-actions {
+    grid-template-columns: 1fr;
   }
 }
 
