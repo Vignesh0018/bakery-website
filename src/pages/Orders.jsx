@@ -576,13 +576,33 @@ function Orders() {
 
                   <div className="order-info-block">
                     <span className="order-info-label">Payment & Total</span>
-                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
                       <span className="order-pill-tag">
                         💳 {order.payment_method || "Cash on Delivery"}
                       </span>
                       <span className="order-total-highlight">
                         ₹{Number(order.total_amount || 0).toLocaleString("en-IN")}
                       </span>
+                      <select
+                        value={order.payment_status || (order.order_status === "Delivered" ? "Paid" : "Pending")}
+                        onChange={(e) => updatePaymentStatus(order.id, e.target.value)}
+                        style={{
+                          fontSize: "12px",
+                          fontWeight: "700",
+                          padding: "4px 8px",
+                          borderRadius: "20px",
+                          border: "1px solid #d0c0b0",
+                          background: (order.payment_status || (order.order_status === "Delivered" ? "Paid" : "Pending")) === "Paid" ? "#e8f5e9" : "#fff3e0",
+                          color: (order.payment_status || (order.order_status === "Delivered" ? "Paid" : "Pending")) === "Paid" ? "#2e7d32" : "#e65100",
+                          cursor: "pointer",
+                        }}
+                        title="Change Payment Status"
+                      >
+                        <option value="Paid">✓ Paid</option>
+                        <option value="Pending">⏳ Pending</option>
+                        <option value="Partial">⚠️ Partial</option>
+                        <option value="Refunded">🔄 Refunded</option>
+                      </select>
                     </div>
                   </div>
                 </div>
