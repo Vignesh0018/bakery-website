@@ -13,6 +13,7 @@ import AdminLayout from "./layouts/AdminLayout";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import Billing from "./pages/Billing";
+import Payments from "./pages/Payments";
 import Products from "./pages/Products";
 import Orders from "./pages/Orders";
 import Categories from "./pages/Categories";
@@ -53,6 +54,7 @@ function App() {
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/billing" element={<Billing />} />
+          <Route path="/admin/payments" element={<Payments />} />
           <Route path="/admin/products" element={<Products />} />
           <Route path="/admin/categories" element={<Categories />} />
           <Route path="/admin/orders" element={<Orders />} />
