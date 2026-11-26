@@ -806,6 +806,16 @@ function AdminDashboard() {
 
               <div
                 className="admin-action-card"
+                onClick={() => navigate("/admin/payments")}
+                style={{ borderLeft: "4px solid #1565c0" }}
+              >
+                <span className="admin-action-icon">💳</span>
+                <h3>Payment Tracking</h3>
+                <p>Reconcile cash drawer, UPI transactions & customer credit dues</p>
+              </div>
+
+              <div
+                className="admin-action-card"
                 onClick={() => navigate("/admin/products")}
               >
                 <span className="admin-action-icon">🍰</span>

@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { path: "/admin/products", label: "Products", icon: "🍰" },
   { path: "/admin/categories", label: "Categories", icon: "🏷️" },
   { path: "/admin/orders", label: "Orders", icon: "📦" },
+  { path: "/admin/payments", label: "Payments", icon: "💳" },
   { path: "/admin/customers", label: "Customers", icon: "👥" },
   { path: "/admin/inventory", label: "Inventory", icon: "🌾" },
   { path: "/admin/expenses", label: "Expenses", icon: "💸" },
