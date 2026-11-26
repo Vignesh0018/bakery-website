@@ -156,8 +156,8 @@
 /* Metric KPI Cards Grid */
 .payments-kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
   margin-bottom: 28px;
 }
 
@@ -220,7 +220,7 @@
   margin-bottom: 20px;
   border-bottom: 2px solid #ede4db;
   padding-bottom: 12px;
-  overflow-x: auto;
+  flex-wrap: wrap;
 }
 
 .payments-tab-btn {
