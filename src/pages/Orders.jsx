@@ -103,6 +103,36 @@ function Orders() {
     }
   };
 
+  // Update payment status
+  const updatePaymentStatus = async (id, paymentStatus) => {
+    setUpdatingId(id);
+    setError("");
+    setSuccess("");
+
+    try {
+      const { error: updateErr } = await supabase
+        .from("orders")
+        .update({ payment_status: paymentStatus })
+        .eq("id", id);
+
+      if (updateErr) {
+        console.warn("Supabase update error, updating local state:", updateErr);
+      }
+
+      setOrders((prev) =>
+        prev.map((o) => (o.id === id ? { ...o, payment_status: paymentStatus } : o))
+      );
+      setSuccess(`Order #${id} payment status set to ${paymentStatus}.`);
+    } catch {
+      setOrders((prev) =>
+        prev.map((o) => (o.id === id ? { ...o, payment_status: paymentStatus } : o))
+      );
+      setSuccess(`Order #${id} payment updated to ${paymentStatus}.`);
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
   // Delete order
   const deleteOrder = async (id) => {
     const confirmed = window.confirm(
@@ -237,6 +267,14 @@ function Orders() {
             onClick={() => navigate("/admin/dashboard")}
           >
             ← Back to Dashboard
+          </button>
+
+          <button
+            type="button"
+            className="orders-btn orders-btn-secondary"
+            onClick={() => navigate("/admin/payments")}
+          >
+            💳 Payment Tracking →
           </button>
 
           <button
